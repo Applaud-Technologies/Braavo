@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen } from '@testing-library/react'
-import App from './App'
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import App from './App';
 
 describe('App', () => {
-  it('renders header with Braavo title', () => {
-    render(<App />)
-    expect(screen.getByText('Braavo')).toBeInTheDocument()
-  })
-})
+  it('redirects to login when not authenticated', () => {
+    render(<App />);
+    expect(screen.getByText('Sign in to Braavo')).toBeInTheDocument();
+  });
+});
