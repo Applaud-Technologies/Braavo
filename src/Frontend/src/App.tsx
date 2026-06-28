@@ -7,6 +7,7 @@ import ChatPage from './pages/ChatPage';
 import WireframePage from './pages/WireframePage';
 import { WelcomePage } from './pages/WelcomePage';
 import { ProductListPage } from './pages/ProductListPage';
+import { CreateProductPage } from './pages/CreateProductPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function Dashboard() {
@@ -81,7 +82,7 @@ function App() {
             path="/products/new"
             element={
               <ProtectedRoute>
-                <Navigate to="/products" replace />
+                <CreateProductPage />
               </ProtectedRoute>
             }
           />
