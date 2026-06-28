@@ -24,7 +24,14 @@ public class Persona
 
     private Persona() { }
 
-    public static Persona Create(Guid productId, string name, string role)
+    public static Persona Create(
+        Guid productId,
+        string name,
+        string role,
+        TechnicalLevel technicalLevel = TechnicalLevel.Medium,
+        string[]? goals = null,
+        string[]? painPoints = null,
+        string? quote = null)
     {
         return new Persona
         {
@@ -32,10 +39,11 @@ public class Persona
             ProductId = productId,
             Name = name,
             Role = role,
-            TechnicalLevel = TechnicalLevel.Medium,
-            Goals = [],
-            PainPoints = [],
+            TechnicalLevel = technicalLevel,
+            Goals = goals ?? [],
+            PainPoints = painPoints ?? [],
             Motivations = [],
+            Quote = quote ?? string.Empty,
             SortOrder = 0,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

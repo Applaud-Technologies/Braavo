@@ -1,0 +1,18 @@
+- generic [ref=e4]:
+  - button "Back to Todo app" [ref=e5] [cursor=pointer]:
+    - img [ref=e6]
+    - text: Back to Todo app
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - heading "User Personas" [level=1] [ref=e10]
+      - paragraph [ref=e11]: Todo app
+    - button "Add Persona" [ref=e12] [cursor=pointer]:
+      - img [ref=e13]
+      - text: Add Persona
+  - generic [ref=e15]:
+    - heading "Generate Persona with AI" [level=3] [ref=e16]
+    - generic [ref=e17]:
+      - textbox "Describe a user type (e.g., 'A busy project manager who needs to track multiple projects')" [ref=e18]: A busy project manager
+      - button "Generate" [ref=e19] [cursor=pointer]:
+        - generic [ref=e38]: ✨
+        - text: Generate

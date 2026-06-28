@@ -1,0 +1,84 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - button "Back to Todo app" [ref=e5] [cursor=pointer]:
+      - img [ref=e6]
+      - text: Back to Todo app
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - heading "User Personas" [level=1] [ref=e10]
+        - paragraph [ref=e11]: Todo app
+      - button "Add Persona" [ref=e12] [cursor=pointer]:
+        - img [ref=e13]
+        - text: Add Persona
+    - generic [ref=e15]:
+      - heading "Generate Persona with AI" [level=3] [ref=e16]
+      - generic [ref=e17]:
+        - textbox "Describe a user type (e.g., 'A busy project manager who needs to track multiple projects')" [ref=e18]: A busy project manager
+        - button "Generate" [ref=e19] [cursor=pointer]:
+          - generic [ref=e38]: ✨
+          - text: Generate
+  - generic [ref=e55]:
+    - generic [ref=e56]:
+      - heading "Edit Persona" [level=2] [ref=e57]
+      - paragraph [ref=e58]: Define a user persona for your product
+    - generic [ref=e59]:
+      - generic [ref=e60]:
+        - generic [ref=e61]: Name
+        - textbox "e.g., Sarah the Designer" [ref=e62]: Alex Thompson
+      - generic [ref=e63]:
+        - generic [ref=e64]: Role
+        - textbox "e.g., UX Designer, Product Manager" [ref=e65]: Product Manager
+      - generic [ref=e66]:
+        - generic [ref=e67]: Technical Level
+        - generic [ref=e68]:
+          - generic [ref=e69] [cursor=pointer]:
+            - radio "Low" [ref=e70]
+            - text: Low
+          - generic [ref=e71] [cursor=pointer]:
+            - radio "Medium" [checked] [ref=e72]
+            - text: Medium
+          - generic [ref=e73] [cursor=pointer]:
+            - radio "High" [ref=e74]
+            - text: High
+      - generic [ref=e75]:
+        - generic [ref=e76]: Goals
+        - generic [ref=e77]:
+          - generic [ref=e78]:
+            - textbox "Goal 1" [ref=e79]: Streamline project workflows
+            - button "Remove goal" [ref=e80] [cursor=pointer]:
+              - img [ref=e81]
+          - generic [ref=e83]:
+            - textbox "Goal 2" [ref=e84]: Improve team collaboration
+            - button "Remove goal" [ref=e85] [cursor=pointer]:
+              - img [ref=e86]
+          - generic [ref=e88]:
+            - textbox "Goal 3" [ref=e89]: Track project metrics effectively
+            - button "Remove goal" [ref=e90] [cursor=pointer]:
+              - img [ref=e91]
+          - button "Add goal" [ref=e93] [cursor=pointer]:
+            - img [ref=e94]
+            - text: Add goal
+      - generic [ref=e96]:
+        - generic [ref=e97]: Pain Points
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - textbox "Pain point 1" [ref=e100]: Too many disconnected tools
+            - button "Remove pain point" [ref=e101] [cursor=pointer]:
+              - img [ref=e102]
+          - generic [ref=e104]:
+            - textbox "Pain point 2" [ref=e105]: Difficulty getting status updates
+            - button "Remove pain point" [ref=e106] [cursor=pointer]:
+              - img [ref=e107]
+          - generic [ref=e109]:
+            - textbox "Pain point 3" [ref=e110]: Manual reporting processes
+            - button "Remove pain point" [ref=e111] [cursor=pointer]:
+              - img [ref=e112]
+          - button "Add pain point" [ref=e114] [cursor=pointer]:
+            - img [ref=e115]
+            - text: Add pain point
+      - generic [ref=e117]:
+        - generic [ref=e118]: Quote
+        - textbox "A representative quote from this persona..." [ref=e119]: I need a single place to see everything happening across my projects.
+      - generic [ref=e120]:
+        - button "Save Changes" [ref=e121] [cursor=pointer]
+        - button "Cancel" [ref=e122] [cursor=pointer]

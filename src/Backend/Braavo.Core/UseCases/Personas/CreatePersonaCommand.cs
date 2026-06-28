@@ -9,7 +9,11 @@ public record CreatePersonaCommand(
     Guid ProductId,
     Guid UserId,
     string Name,
-    string Role
+    string Role,
+    string TechnicalLevel = "Medium",
+    string[]? Goals = null,
+    string[]? PainPoints = null,
+    string? Quote = null
 ) : IRequest<CreatePersonaResult>;
 
 public record CreatePersonaResult(
@@ -41,7 +45,18 @@ public class CreatePersonaHandler : IRequestHandler<CreatePersonaCommand, Create
         if (string.IsNullOrWhiteSpace(request.Role))
             return new CreatePersonaResult(Guid.Empty, false, "Persona role is required");
 
-        var persona = Persona.Create(request.ProductId, request.Name, request.Role);
+        var techLevel = Enum.TryParse<TechnicalLevel>(request.TechnicalLevel, true, out var level)
+            ? level
+            : TechnicalLevel.Medium;
+
+        var persona = Persona.Create(
+            request.ProductId,
+            request.Name,
+            request.Role,
+            techLevel,
+            request.Goals,
+            request.PainPoints,
+            request.Quote);
         await _personaRepo.AddAsync(persona, ct);
 
         return new CreatePersonaResult(persona.Id, true);

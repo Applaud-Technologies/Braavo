@@ -15,7 +15,9 @@ const initialState: PersonasState = {
 
 export const fetchPersonas = createAsyncThunk('personas/fetchAll', async (productId: string) => {
   const response = await personasApi.list(productId);
-  return response.data;
+  // API returns { success, personas, error } but we need the array
+  const data = response.data as { personas?: Persona[] } | Persona[];
+  return Array.isArray(data) ? data : (data.personas ?? []);
 });
 
 export const createPersona = createAsyncThunk(
