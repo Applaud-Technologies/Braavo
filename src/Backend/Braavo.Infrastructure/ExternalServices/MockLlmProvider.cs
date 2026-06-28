@@ -34,33 +34,102 @@ public class MockLlmProvider : ILlmProvider
 
     private static string GenerateMockPrd(string prompt)
     {
+        var ideaSummary = prompt.Length > 80 ? prompt[..80] + "..." : prompt;
         return $"""
-        # Product Requirements Document
+        # Smart Product Solution
 
-        ## Overview
-        Based on your idea: "{prompt.Substring(0, Math.Min(50, prompt.Length))}..."
+        ## 1. Objective and Purpose
 
-        ## Problem Statement
-        Users need a solution that addresses the core challenge described.
+        **Product Vision:** {ideaSummary}
 
-        ## Target Users
-        - Primary: End users who will benefit from this solution
-        - Secondary: Administrators and power users
+        This product addresses a critical need in the market by providing users with an intuitive, efficient solution. The core problem it solves is the friction and complexity users currently face when trying to accomplish their goals.
 
-        ## Features
-        1. **Core Feature** - The main functionality
-        2. **Supporting Feature** - Enhances the core experience
-        3. **Analytics** - Track usage and outcomes
+        **Why Now:** Market demand and technological readiness make this the right time to build this solution. Expected business value includes increased user productivity, reduced operational costs, and new revenue opportunities.
 
-        ## Success Metrics
-        - User adoption rate > 50%
-        - Task completion time reduced by 30%
-        - User satisfaction score > 4.0/5.0
+        ## 2. User Personas
 
-        ## User Stories
-        - As a user, I want to easily accomplish my goal
-        - As a user, I want to track my progress
-        - As an admin, I want to manage user access
+        ### Sarah - The Power User
+        - **Role:** Team Lead at a mid-size company
+        - **Goals:** Streamline daily workflows, improve team collaboration
+        - **Pain Points:** Too many disconnected tools, manual repetitive tasks
+        - **Technical Comfort:** High - comfortable with modern software
+
+        ### Mike - The Casual User
+        - **Role:** Individual contributor
+        - **Goals:** Get work done quickly without learning complex tools
+        - **Pain Points:** Steep learning curves, feature overload
+        - **Technical Comfort:** Medium - prefers simple, intuitive interfaces
+
+        ### Alex - The Administrator
+        - **Role:** IT Administrator
+        - **Goals:** Manage users, ensure security, generate reports
+        - **Pain Points:** Lack of centralized control, compliance concerns
+        - **Technical Comfort:** High - needs robust admin capabilities
+
+        ## 3. User Stories
+
+        - As a **power user**, I want to automate repetitive tasks so that I can focus on higher-value work.
+        - As a **casual user**, I want a simple onboarding experience so that I can start being productive immediately.
+        - As a **team lead**, I want to see my team's progress at a glance so that I can identify blockers early.
+        - As an **administrator**, I want to manage user permissions so that I can ensure data security.
+        - As a **user**, I want to integrate with my existing tools so that I don't have to change my workflow.
+        - As a **user**, I want to access the product on mobile so that I can work from anywhere.
+
+        ## 4. Features and Requirements
+
+        ### Core (MVP)
+        - **User Authentication** - Secure login with SSO support
+        - **Dashboard** - Personalized overview of key metrics and tasks
+        - **Core Workflow** - Main functionality addressing the primary use case
+        - **Notifications** - Real-time alerts for important events
+
+        ### Enhanced (Phase 2)
+        - **Team Collaboration** - Shared workspaces, comments, mentions
+        - **Integrations** - Connect with Slack, GitHub, Jira
+        - **Advanced Reporting** - Custom reports and data exports
+        - **Mobile App** - Native iOS and Android applications
+
+        ### Future (Phase 3)
+        - **AI-Powered Insights** - Predictive analytics and recommendations
+        - **Automation Builder** - Custom workflow automation
+        - **API Access** - Public API for custom integrations
+
+        ## 5. Technical Requirements
+
+        - **Platforms:** Web (responsive), iOS, Android
+        - **Integrations:** OAuth 2.0, REST APIs for Slack/GitHub/Jira
+        - **Performance:** Page load < 2 seconds, API response < 200ms, 99.9% uptime
+        - **Security:** SOC 2 compliance, end-to-end encryption, MFA support
+        - **Constraints:** Must support latest 2 versions of major browsers
+
+        ## 6. Design and UX Considerations
+
+        - **Key Screens:** Dashboard, Workflow View, Settings, Admin Panel
+        - **Navigation:** Top nav for main sections, sidebar for context-specific actions
+        - **Accessibility:** WCAG 2.1 AA compliance
+        - **Visual Style:** Clean, modern, consistent with brand guidelines
+
+        ## 7. Metrics and Success Criteria
+
+        | Metric | Target | Timeframe |
+        |--------|--------|-----------|
+        | User Adoption | 50% of target users | 3 months post-launch |
+        | Daily Active Users | 1,000 DAU | 6 months |
+        | Task Completion Rate | > 85% | Ongoing |
+        | User Satisfaction (NPS) | > 40 | Quarterly |
+        | Feature Usage | 3+ features/user | Monthly |
+
+        ## 8. Timeline and Milestones
+
+        - **Phase 1 (MVP):** Core features - 8 weeks
+          - Week 1-2: Architecture and setup
+          - Week 3-5: Core workflow implementation
+          - Week 6-7: Testing and refinement
+          - Week 8: Beta launch
+
+        - **Phase 2 (Enhancement):** Team features + integrations - 6 weeks after MVP
+
+        - **Phase 3 (Scale):** Mobile apps + AI features - Q2 following year
         """;
     }
 }
