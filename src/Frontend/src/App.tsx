@@ -13,6 +13,7 @@ import { PersonasPage } from './pages/PersonasPage';
 import { StoriesPage } from './pages/StoriesPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { TimelinePage } from './pages/TimelinePage';
+import { DiagramsPage } from './pages/DiagramsPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -107,6 +108,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TimelinePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/:id/diagrams"
+            element={
+              <ProtectedRoute>
+                <DiagramsPage />
               </ProtectedRoute>
             }
           />
