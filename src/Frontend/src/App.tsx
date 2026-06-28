@@ -12,6 +12,7 @@ import { ProductDetailPage } from './pages/ProductDetailPage';
 import { PersonasPage } from './pages/PersonasPage';
 import { StoriesPage } from './pages/StoriesPage';
 import { FeaturesPage } from './pages/FeaturesPage';
+import { TimelinePage } from './pages/TimelinePage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -98,6 +99,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FeaturesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/:id/timeline"
+            element={
+              <ProtectedRoute>
+                <TimelinePage />
               </ProtectedRoute>
             }
           />

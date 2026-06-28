@@ -5,6 +5,7 @@ import personasReducer from './slices/personasSlice';
 import storiesReducer from './slices/storiesSlice';
 import featuresReducer from './slices/featuresSlice';
 import aiReducer from './slices/aiSlice';
+import timelineReducer from './slices/timelineSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     stories: storiesReducer,
     features: featuresReducer,
     ai: aiReducer,
+    timeline: timelineReducer,
   },
 });
 
