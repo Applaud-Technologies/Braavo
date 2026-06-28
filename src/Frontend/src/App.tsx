@@ -10,6 +10,7 @@ import { ProductListPage } from './pages/ProductListPage';
 import { CreateProductPage } from './pages/CreateProductPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { PersonasPage } from './pages/PersonasPage';
+import { StoriesPage } from './pages/StoriesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function Dashboard() {
@@ -101,6 +102,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PersonasPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/:id/stories"
+            element={
+              <ProtectedRoute>
+                <StoriesPage />
               </ProtectedRoute>
             }
           />
