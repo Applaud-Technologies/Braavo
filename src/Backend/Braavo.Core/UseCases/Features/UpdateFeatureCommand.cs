@@ -1,5 +1,6 @@
 using Braavo.Core.Entities;
 using Braavo.Core.Interfaces;
+using Braavo.Core.UseCases.Products;
 using Braavo.Core.ValueObjects;
 using MediatR;
 
@@ -22,11 +23,13 @@ public class UpdateFeatureHandler : IRequestHandler<UpdateFeatureCommand, Update
 {
     private readonly IProductRepository _productRepo;
     private readonly IFeatureRepository _featureRepo;
+    private readonly IMediator _mediator;
 
-    public UpdateFeatureHandler(IProductRepository productRepo, IFeatureRepository featureRepo)
+    public UpdateFeatureHandler(IProductRepository productRepo, IFeatureRepository featureRepo, IMediator mediator)
     {
         _productRepo = productRepo;
         _featureRepo = featureRepo;
+        _mediator    = mediator;
     }
 
     public async Task<UpdateFeatureResult> Handle(UpdateFeatureCommand request, CancellationToken ct)
@@ -52,6 +55,8 @@ public class UpdateFeatureHandler : IRequestHandler<UpdateFeatureCommand, Update
             feature.UpdateSortOrder(request.SortOrder.Value);
 
         await _featureRepo.UpdateAsync(feature, ct);
+
+        await _mediator.Send(new RecalculateCompletionCommand(request.ProductId), ct);
 
         return new UpdateFeatureResult(true);
     }

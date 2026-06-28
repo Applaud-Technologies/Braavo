@@ -1,5 +1,6 @@
 using Braavo.Core.Entities;
 using Braavo.Core.Interfaces;
+using Braavo.Core.UseCases.Products;
 using Braavo.Core.ValueObjects;
 using MediatR;
 
@@ -24,11 +25,13 @@ public class CreateUserStoryHandler : IRequestHandler<CreateUserStoryCommand, Cr
 {
     private readonly IProductRepository _productRepo;
     private readonly IUserStoryRepository _storyRepo;
+    private readonly IMediator _mediator;
 
-    public CreateUserStoryHandler(IProductRepository productRepo, IUserStoryRepository storyRepo)
+    public CreateUserStoryHandler(IProductRepository productRepo, IUserStoryRepository storyRepo, IMediator mediator)
     {
         _productRepo = productRepo;
-        _storyRepo = storyRepo;
+        _storyRepo   = storyRepo;
+        _mediator    = mediator;
     }
 
     public async Task<CreateUserStoryResult> Handle(CreateUserStoryCommand request, CancellationToken ct)
@@ -52,6 +55,8 @@ public class CreateUserStoryHandler : IRequestHandler<CreateUserStoryCommand, Cr
             story.LinkToPersona(request.PersonaId);
 
         await _storyRepo.AddAsync(story, ct);
+
+        await _mediator.Send(new RecalculateCompletionCommand(request.ProductId), ct);
 
         return new CreateUserStoryResult(story.Id, true);
     }

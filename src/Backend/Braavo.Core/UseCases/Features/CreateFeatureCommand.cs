@@ -1,5 +1,6 @@
 using Braavo.Core.Entities;
 using Braavo.Core.Interfaces;
+using Braavo.Core.UseCases.Products;
 using Braavo.Core.ValueObjects;
 using MediatR;
 
@@ -26,11 +27,13 @@ public class CreateFeatureHandler : IRequestHandler<CreateFeatureCommand, Create
 {
     private readonly IProductRepository _productRepo;
     private readonly IFeatureRepository _featureRepo;
+    private readonly IMediator _mediator;
 
-    public CreateFeatureHandler(IProductRepository productRepo, IFeatureRepository featureRepo)
+    public CreateFeatureHandler(IProductRepository productRepo, IFeatureRepository featureRepo, IMediator mediator)
     {
         _productRepo = productRepo;
         _featureRepo = featureRepo;
+        _mediator    = mediator;
     }
 
     public async Task<CreateFeatureResult> Handle(CreateFeatureCommand request, CancellationToken ct)
@@ -54,6 +57,8 @@ public class CreateFeatureHandler : IRequestHandler<CreateFeatureCommand, Create
             feature.SetParent(request.ParentId);
 
         await _featureRepo.AddAsync(feature, ct);
+
+        await _mediator.Send(new RecalculateCompletionCommand(request.ProductId), ct);
 
         return new CreateFeatureResult(feature.Id, true);
     }

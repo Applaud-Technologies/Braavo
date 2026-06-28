@@ -1,5 +1,6 @@
 using Braavo.Core.Entities;
 using Braavo.Core.Interfaces;
+using Braavo.Core.UseCases.Products;
 using Braavo.Core.ValueObjects;
 using MediatR;
 
@@ -32,11 +33,13 @@ public class UpdateTimelineHandler : IRequestHandler<UpdateTimelineCommand, Upda
 {
     private readonly IProductRepository _productRepo;
     private readonly ITimelineRepository _timelineRepo;
+    private readonly IMediator _mediator;
 
-    public UpdateTimelineHandler(IProductRepository productRepo, ITimelineRepository timelineRepo)
+    public UpdateTimelineHandler(IProductRepository productRepo, ITimelineRepository timelineRepo, IMediator mediator)
     {
-        _productRepo = productRepo;
+        _productRepo  = productRepo;
         _timelineRepo = timelineRepo;
+        _mediator     = mediator;
     }
 
     public async Task<UpdateTimelineResult> Handle(UpdateTimelineCommand request, CancellationToken ct)
@@ -69,6 +72,8 @@ public class UpdateTimelineHandler : IRequestHandler<UpdateTimelineCommand, Upda
         }).ToList();
 
         await _timelineRepo.ReplaceTimelineAsync(request.ProductId, phases, ct);
+
+        await _mediator.Send(new RecalculateCompletionCommand(request.ProductId), ct);
 
         return new UpdateTimelineResult(true);
     }

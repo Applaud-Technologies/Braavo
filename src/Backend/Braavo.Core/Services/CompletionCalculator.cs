@@ -60,6 +60,6 @@ public static class CompletionCalculator
         if (timelinePhases.Count >= 1)
             percentage += TimelineWeight;
 
-        return Math.Clamp(percentage, 0, 100);
+        return percentage;
     }
 }

@@ -187,4 +187,30 @@ public class RecalculateCompletionHandlerTests
         // Only vision (10%) should count
         result.CompletionPercentage.Should().Be(10);
     }
+
+    [Fact]
+    public async Task Handle_Only2Features_DoesNotGrantFeaturePoints()
+    {
+        var product = MakeProduct(vision: "Vision");
+        _productRepo.GetByIdAsync(product.Id, Arg.Any<CancellationToken>()).Returns(product);
+
+        _personaRepo.GetByProductIdAsync(product.Id, Arg.Any<CancellationToken>())
+                    .Returns(new List<Persona>().AsReadOnly());
+        _userStoryRepo.GetByProductIdAsync(product.Id, Arg.Any<CancellationToken>())
+                      .Returns(new List<UserStory>().AsReadOnly());
+        _timelineRepo.GetByProductIdAsync(product.Id, Arg.Any<CancellationToken>())
+                     .Returns(new List<TimelinePhase>().AsReadOnly());
+
+        // Only 2 features — threshold is 3
+        _featureRepo.GetByProductIdAsync(product.Id, Arg.Any<CancellationToken>())
+                    .Returns(Enumerable.Range(0, 2)
+                             .Select(_ => Feature.Create(product.Id, "Feature", "Desc"))
+                             .ToList().AsReadOnly());
+
+        var result = await _handler.Handle(
+            new RecalculateCompletionCommand(product.Id), CancellationToken.None);
+
+        // Only vision (10%) should count
+        result.CompletionPercentage.Should().Be(10);
+    }
 }
