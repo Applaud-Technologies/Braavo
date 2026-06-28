@@ -30,6 +30,9 @@ public class RefinePrdHandler : IRequestHandler<RefinePrdCommand, RefinePrdRespo
         if (document is null)
             return new RefinePrdResponse("", 0, false, "Document not found");
 
+        if (document.CreatedBy.Value != request.UserId)
+            return new RefinePrdResponse("", 0, false, "Forbidden");
+
         var prompt = $"""
             Current PRD:
             {document.Content}

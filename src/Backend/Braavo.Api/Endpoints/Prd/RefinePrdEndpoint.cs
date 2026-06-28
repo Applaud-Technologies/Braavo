@@ -37,6 +37,11 @@ public class RefinePrdEndpoint : Endpoint<RefineRequest, RefinePrdResponse>
             await SendOkAsync(result, ct);
         else if (result.Error == "Document not found")
             await SendNotFoundAsync(ct);
+        else if (result.Error == "Forbidden")
+        {
+            await SendForbiddenAsync(ct);
+            return;
+        }
         else
             await SendAsync(result, 500, ct);
     }

@@ -14,7 +14,8 @@ public class RefinePrdHandlerTests
     public async Task Handle_UpdatesDocumentContent()
     {
         var documentId = Guid.NewGuid();
-        var document = Document.Create("Test PRD", DocumentType.Prd, Guid.NewGuid(), UserId.New());
+        var ownerId = UserId.New();
+        var document = Document.Create("Test PRD", DocumentType.Prd, Guid.NewGuid(), ownerId);
         document.UpdateContent("# Original PRD\n\n## Features\n- Feature 1");
 
         var documentRepo = Substitute.For<IDocumentRepository>();
@@ -25,7 +26,7 @@ public class RefinePrdHandlerTests
             .Returns(new LlmResponse("# Refined PRD\n\n## Features\n- Feature 1\n- Feature 2", 100, 200, true));
 
         var handler = new RefinePrdHandler(llmProvider, documentRepo);
-        var command = new RefinePrdCommand(documentId, "Add another feature", Guid.NewGuid());
+        var command = new RefinePrdCommand(documentId, "Add another feature", ownerId.Value);
 
         var result = await handler.Handle(command, CancellationToken.None);
 
