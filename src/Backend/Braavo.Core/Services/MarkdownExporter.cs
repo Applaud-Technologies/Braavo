@@ -256,7 +256,11 @@ public static class MarkdownExporter
 
     public static string SanitizeFileName(string name)
     {
-        var invalid = Path.GetInvalidFileNameChars();
-        return string.Concat(name.Where(c => !invalid.Contains(c))).Replace(" ", "-").ToLowerInvariant();
+        var invalid = Path.GetInvalidFileNameChars()
+                          .Concat(new[] { '"', ';', '\\' })
+                          .ToHashSet();
+        return string.Concat(name.Where(c => !invalid.Contains(c)))
+                     .Replace(" ", "-")
+                     .ToLowerInvariant();
     }
 }

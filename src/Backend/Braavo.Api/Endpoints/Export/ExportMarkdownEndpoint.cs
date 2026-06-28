@@ -49,8 +49,6 @@ public class ExportMarkdownEndpoint : Endpoint<ExportMarkdownRequest>
             return;
         }
 
-        HttpContext.Response.Headers["Content-Disposition"] = $"attachment; filename=\"{result.FileName}\"";
-
         await SendBytesAsync(
             result.Content!,
             result.FileName!,
