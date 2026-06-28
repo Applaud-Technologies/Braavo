@@ -12,7 +12,8 @@ public class ExportBundleHandlerTests
     [Fact]
     public async Task Handle_GeneratesZipBundle()
     {
-        var document = Document.Create("Test PRD", DocumentType.Prd, Guid.NewGuid(), UserId.New());
+        var ownerId = UserId.New();
+        var document = Document.Create("Test PRD", DocumentType.Prd, Guid.NewGuid(), ownerId);
         document.UpdateContent("""
             # Test Product PRD
 
@@ -27,7 +28,7 @@ public class ExportBundleHandlerTests
         documentRepo.GetByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(document);
 
         var handler = new ExportBundleHandler(documentRepo);
-        var command = new ExportBundleCommand(Guid.NewGuid());
+        var command = new ExportBundleCommand(Guid.NewGuid(), false, ownerId.Value);
 
         var result = await handler.Handle(command, CancellationToken.None);
 

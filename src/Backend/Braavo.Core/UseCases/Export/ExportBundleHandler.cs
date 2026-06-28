@@ -18,6 +18,11 @@ public class ExportBundleHandler : IRequestHandler<ExportBundleCommand, ExportRe
         if (document is null)
             return new ExportResult([], "", false, "Document not found");
 
+        if (document.CreatedBy.Value != request.UserId)
+        {
+            return new ExportResult(Array.Empty<byte>(), "", false, "Forbidden");
+        }
+
         var prd = PrdParser.Parse(document.Content);
         var sanitizedTitle = SanitizeFileName(prd.Title);
 

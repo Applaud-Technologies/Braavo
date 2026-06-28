@@ -4,7 +4,13 @@ using MediatR;
 
 namespace Braavo.Api.Endpoints.Export;
 
-public class ExportBundleEndpoint : EndpointWithoutRequest
+public class ExportRequest
+{
+    public Guid DocumentId { get; set; }
+    public bool IncludeDiagrams { get; set; } = false;
+}
+
+public class ExportBundleEndpoint : Endpoint<ExportRequest>
 {
     private readonly IMediator _mediator;
 
@@ -12,22 +18,35 @@ public class ExportBundleEndpoint : EndpointWithoutRequest
 
     public override void Configure()
     {
-        Get("/api/export/{documentId}");
+        Get("/api/export");
         Policies("Authenticated");
     }
 
-    public override async Task HandleAsync(CancellationToken ct)
+    public override async Task HandleAsync(ExportRequest req, CancellationToken ct)
     {
-        var documentId = Route<Guid>("documentId");
-        var command = new ExportBundleCommand(documentId);
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+        {
+            await SendUnauthorizedAsync(ct);
+            return;
+        }
+
+        var command = new ExportBundleCommand(req.DocumentId, req.IncludeDiagrams, userId);
         var result = await _mediator.Send(command, ct);
 
         if (!result.Success)
         {
+            if (result.Error == "Forbidden")
+            {
+                await SendForbiddenAsync(ct);
+                return;
+            }
             if (result.Error == "Document not found")
+            {
                 await SendNotFoundAsync(ct);
-            else
-                await SendAsync(new { error = result.Error }, 500, ct);
+                return;
+            }
+            await SendAsync(new { error = result.Error }, 500, ct);
             return;
         }
 
