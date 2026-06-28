@@ -67,6 +67,8 @@ export function ProductDetailPage() {
     { label: 'Personas', count: currentProduct.personas.length, icon: '👥', path: 'personas' },
     { label: 'User Stories', count: currentProduct.userStories.length, icon: '📖', path: 'stories' },
     { label: 'Features', count: currentProduct.features.length, icon: '🎯', path: 'features' },
+    { label: 'Timeline', count: 0, icon: '📅', path: 'timeline' },
+    { label: 'Diagrams', count: 0, icon: '📊', path: 'diagrams' },
   ];
 
   return (
