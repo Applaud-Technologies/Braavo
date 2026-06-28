@@ -14,6 +14,7 @@ import { StoriesPage } from './pages/StoriesPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import { TimelinePage } from './pages/TimelinePage';
 import { DiagramsPage } from './pages/DiagramsPage';
+import PreviewPage from './pages/PreviewPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -116,6 +117,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <DiagramsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/:id/preview"
+            element={
+              <ProtectedRoute>
+                <PreviewPage />
               </ProtectedRoute>
             }
           />

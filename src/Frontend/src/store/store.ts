@@ -7,6 +7,7 @@ import featuresReducer from './slices/featuresSlice';
 import aiReducer from './slices/aiSlice';
 import timelineReducer from './slices/timelineSlice';
 import diagramsReducer from './slices/diagramsSlice';
+import exportReducer from './slices/exportSlice';
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     ai: aiReducer,
     timeline: timelineReducer,
     diagrams: diagramsReducer,
+    export: exportReducer,
   },
 });
 
