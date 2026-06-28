@@ -16,18 +16,24 @@ import DiagramExport from '../components/diagrams/DiagramExport';
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function newPhase(): TimelinePhase {
-  const today = new Date().toISOString().slice(0, 10);
   return {
     id: crypto.randomUUID(),
     name: '',
-    startDate: today,
-    endDate: today,
+    durationWeeks: 4,
+    startDate: null,
+    sortOrder: 0,
     milestones: [],
   };
 }
 
 function newMilestone(): TimelineMilestone {
-  return { name: '', date: new Date().toISOString().slice(0, 10) };
+  return {
+    id: crypto.randomUUID(),
+    name: '',
+    weekNumber: 1,
+    deliverables: [],
+    status: 'planned',
+  };
 }
 
 // ── sub-components ────────────────────────────────────────────────────────────
@@ -50,11 +56,22 @@ function MilestoneRow({ milestone, index, onChange, onDelete }: MilestoneRowProp
         className="input flex-1 text-sm py-1.5"
       />
       <input
-        type="date"
-        value={milestone.date}
-        onChange={(e) => onChange(index, { ...milestone, date: e.target.value })}
-        className="input w-40 text-sm py-1.5"
+        type="number"
+        value={milestone.weekNumber}
+        onChange={(e) => onChange(index, { ...milestone, weekNumber: parseInt(e.target.value) || 1 })}
+        min={1}
+        className="input w-24 text-sm py-1.5"
+        placeholder="Week"
       />
+      <select
+        value={milestone.status}
+        onChange={(e) => onChange(index, { ...milestone, status: e.target.value })}
+        className="input w-32 text-sm py-1.5"
+      >
+        <option value="planned">Planned</option>
+        <option value="in-progress">In Progress</option>
+        <option value="completed">Completed</option>
+      </select>
       <button
         type="button"
         onClick={() => onDelete(index)}
@@ -146,20 +163,21 @@ function PhaseCard({
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">Start Date</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">Duration (weeks)</label>
             <input
-              type="date"
-              value={phase.startDate}
-              onChange={(e) => onUpdate(index, { ...phase, startDate: e.target.value })}
+              type="number"
+              value={phase.durationWeeks}
+              onChange={(e) => onUpdate(index, { ...phase, durationWeeks: parseInt(e.target.value) || 1 })}
+              min={1}
               className="input w-full"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-500 mb-1">End Date</label>
+            <label className="block text-xs font-medium text-stone-500 mb-1">Start Date (optional)</label>
             <input
               type="date"
-              value={phase.endDate}
-              onChange={(e) => onUpdate(index, { ...phase, endDate: e.target.value })}
+              value={phase.startDate ?? ''}
+              onChange={(e) => onUpdate(index, { ...phase, startDate: e.target.value || null })}
               className="input w-full"
             />
           </div>

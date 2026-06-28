@@ -1,15 +1,19 @@
 import { api } from './client';
 
 export interface TimelineMilestone {
+  id: string;
   name: string;
-  date: string; // ISO date string YYYY-MM-DD
+  weekNumber: number;
+  deliverables: string[];
+  status: string; // "planned" | "in-progress" | "completed"
 }
 
 export interface TimelinePhase {
   id: string;
   name: string;
-  startDate: string; // ISO date string YYYY-MM-DD
-  endDate: string;   // ISO date string YYYY-MM-DD
+  durationWeeks: number;
+  startDate: string | null; // ISO date string or null
+  sortOrder: number;
   milestones: TimelineMilestone[];
 }
 
