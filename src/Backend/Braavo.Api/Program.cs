@@ -7,6 +7,7 @@ using Braavo.Infrastructure.Data.Seeds;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -47,7 +48,7 @@ using (var scope = app.Services.CreateScope())
     var context = scope.ServiceProvider.GetRequiredService<BraavoDbContext>();
     await context.Database.EnsureCreatedAsync();
 
-    if (!context.Templates.Any())
+    if (!await context.Templates.AnyAsync())
     {
         var templates = TemplateSeed.GetDefaultTemplates();
         await context.Templates.AddRangeAsync(templates);
