@@ -1,4 +1,5 @@
 using Braavo.Core.Interfaces;
+using Braavo.Infrastructure.Auth;
 using Braavo.Infrastructure.Data;
 using Braavo.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,9 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IDocumentRepository, DocumentRepository>();
+
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IJwtService, JwtService>();
 
         return services;
     }

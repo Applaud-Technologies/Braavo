@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Braavo.Core\Braavo.Core.csproj" />
     <ProjectReference Include="..\..\Braavo.Api\Braavo.Api.csproj" />
+    <ProjectReference Include="..\..\Braavo.Infrastructure\Braavo.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
