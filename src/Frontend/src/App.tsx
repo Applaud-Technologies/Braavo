@@ -9,6 +9,7 @@ import { WelcomePage } from './pages/WelcomePage';
 import { ProductListPage } from './pages/ProductListPage';
 import { CreateProductPage } from './pages/CreateProductPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
+import { PersonasPage } from './pages/PersonasPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function Dashboard() {
@@ -92,6 +93,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ProductDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products/:id/personas"
+            element={
+              <ProtectedRoute>
+                <PersonasPage />
               </ProtectedRoute>
             }
           />
