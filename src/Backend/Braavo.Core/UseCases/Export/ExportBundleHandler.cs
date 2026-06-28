@@ -36,6 +36,12 @@ public class ExportBundleHandler : IRequestHandler<ExportBundleCommand, ExportRe
             AddEntry(archive, "README.md", GenerateReadme(prd));
         }
 
+        // TODO: When IncludeDiagrams is true, generate and add diagram files to diagrams/ folder
+        if (request.IncludeDiagrams)
+        {
+            // Placeholder for diagram export - requires diagram generation service
+        }
+
         memoryStream.Position = 0;
         var fileName = $"{sanitizedTitle}-export.zip";
 
