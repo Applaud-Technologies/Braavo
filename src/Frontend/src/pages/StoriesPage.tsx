@@ -4,10 +4,14 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchStories, createStory, updateStory } from '../store/slices/storiesSlice';
 import { fetchPersonas } from '../store/slices/personasSlice';
 import { fetchProduct } from '../store/slices/productsSlice';
+import { suggestStories, removeSuggestedStory, clearSuggestedStories } from '../store/slices/aiSlice';
 import type { RootState } from '../store/store';
 import type { UserStory, CreateUserStoryRequest, StoryPriority } from '../api/stories';
+import type { SuggestedStory } from '../api/ai';
 import { StoryCard } from '../components/prd/StoryCard';
 import { StoryEditor } from '../components/prd/StoryEditor';
+import AIButton from '../components/ai/AIButton';
+import AISuggestionCard from '../components/ai/AISuggestionCard';
 
 const PRIORITY_SECTIONS: { key: StoryPriority; label: string; emptyLabel: string }[] = [
   { key: 'Must', label: 'Must Have', emptyLabel: 'No must-have stories yet' },
@@ -31,10 +35,13 @@ export function StoriesPage() {
   const { items: stories, loading, error } = useAppSelector((state: RootState) => state.stories);
   const { items: personas } = useAppSelector((state: RootState) => state.personas);
   const { currentProduct } = useAppSelector((state: RootState) => state.products);
+  const { suggestedStories, loading: aiLoading } = useAppSelector((state: RootState) => state.ai);
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingStory, setEditingStory] = useState<UserStory | undefined>(undefined);
   const [filterPersonaId, setFilterPersonaId] = useState<string>('');
+  const [selectedPersonaId, setSelectedPersonaId] = useState<string>('');
+  const [storyContext, setStoryContext] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -57,6 +64,31 @@ export function StoriesPage() {
   const handleCloseEditor = () => {
     setEditorOpen(false);
     setEditingStory(undefined);
+  };
+
+  const handleSuggestStories = () => {
+    if (id && selectedPersonaId) {
+      dispatch(suggestStories({
+        productId: id,
+        personaId: selectedPersonaId,
+        context: storyContext.trim() || undefined,
+      }));
+    }
+  };
+
+  const handleAcceptStory = (story: SuggestedStory, index: number) => {
+    setEditingStory({
+      id: '',
+      personaId: selectedPersonaId,
+      asA: story.asA,
+      iWant: story.iWant,
+      soThat: story.soThat,
+      priority: story.priority,
+      acceptanceCriteria: story.acceptanceCriteria,
+      sortOrder: 0,
+    } as unknown as UserStory);
+    setEditorOpen(true);
+    dispatch(removeSuggestedStory(index));
   };
 
   const handleSave = async (data: CreateUserStoryRequest) => {
@@ -117,6 +149,62 @@ export function StoriesPage() {
             </svg>
             Add Story
           </button>
+        </div>
+
+        {/* AI Story Suggestions */}
+        <div className="card p-6 mb-8">
+          <h3 className="font-display font-semibold text-lg mb-4">Suggest Stories with AI</h3>
+          <div className="flex gap-4 mb-4 flex-wrap">
+            <select
+              value={selectedPersonaId}
+              onChange={(e) => setSelectedPersonaId(e.target.value)}
+              className="input"
+            >
+              <option value="">Select a persona...</option>
+              {personas.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              value={storyContext}
+              onChange={(e) => setStoryContext(e.target.value)}
+              placeholder="Additional context (optional)"
+              className="input flex-1"
+            />
+            <AIButton
+              onClick={handleSuggestStories}
+              loading={aiLoading}
+              disabled={!selectedPersonaId}
+            >
+              Suggest Stories
+            </AIButton>
+          </div>
+
+          {suggestedStories.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-stone-500">{suggestedStories.length} suggestion(s)</p>
+                <button
+                  onClick={() => dispatch(clearSuggestedStories())}
+                  className="text-xs text-stone-400 hover:text-red-600 underline"
+                >
+                  Dismiss all
+                </button>
+              </div>
+              {suggestedStories.map((story, i) => (
+                <AISuggestionCard
+                  key={i}
+                  title={`As a ${story.asA}...`}
+                  onAccept={() => handleAcceptStory(story, i)}
+                  onReject={() => dispatch(removeSuggestedStory(i))}
+                >
+                  <p className="text-stone-700">I want {story.iWant}</p>
+                  <p className="text-stone-600 text-sm mt-1">So that {story.soThat}</p>
+                </AISuggestionCard>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Persona filter */}
