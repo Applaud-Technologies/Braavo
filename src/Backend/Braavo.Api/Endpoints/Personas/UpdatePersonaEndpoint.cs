@@ -9,7 +9,7 @@ namespace Braavo.Api.Endpoints.Personas;
 public record UpdatePersonaRequest(
     string Name,
     string Role,
-    TechnicalLevel TechnicalLevel,
+    string TechnicalLevel,
     string[] Goals,
     string[] PainPoints,
     string Quote
@@ -36,9 +36,13 @@ public class UpdatePersonaEndpoint : Endpoint<UpdatePersonaRequest, UpdatePerson
         var productId = Route<Guid>("productId");
         var personaId = Route<Guid>("id");
 
+        var techLevel = Enum.TryParse<TechnicalLevel>(req.TechnicalLevel, true, out var level)
+            ? level
+            : TechnicalLevel.Medium;
+
         var command = new UpdatePersonaCommand(
             personaId, productId, userId,
-            req.Name, req.Role, req.TechnicalLevel,
+            req.Name, req.Role, techLevel,
             req.Goals, req.PainPoints, req.Quote
         );
         var result = await _mediator.Send(command, ct);
