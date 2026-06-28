@@ -54,6 +54,13 @@
 - **Tools**: OWASP ZAP, Snyk, npm audit
 - **Focus**: SQL injection, XSS, CSRF, dependency vulnerabilities
 
+#### Mutation Testing
+- **Purpose**: Measure test suite quality by introducing code mutations
+- **Coverage**: Critical business logic, Core layer, CQRS handlers
+- **Tools**: Stryker.NET (backend), Stryker Mutator (frontend)
+- **Focus**: Verify tests actually catch bugs, not just execute code
+- **Target**: 80%+ mutation score on Core layer
+
 ## 2. Test Plan
 
 ### 2.1 Test Objectives
@@ -68,6 +75,7 @@
 #### Success Criteria
 - All critical tests pass
 - Code coverage > 80%
+- Mutation score > 80% (Core layer)
 - No high-severity security issues
 - Performance metrics meet requirements
 - User acceptance testing approval
@@ -254,13 +262,13 @@ Scenario: Generate React component from wireframe
 Scenario: Generate API endpoints from requirements
   Given I have a PRD with data requirements
   When I click "Generate API"
-  And I select "Node.js/Express" as the framework
+  And I select "ASP.NET Core FastEndpoints" as the framework
   Then I should receive:
     | File                | Present |
-    | Route definitions   | Yes     |
-    | Controller methods  | Yes     |
-    | Data models         | Yes     |
-    | Validation schemas  | Yes     |
+    | Endpoint classes    | Yes     |
+    | Request/response DTOs | Yes   |
+    | EF Core entities    | Yes     |
+    | FluentValidation validators | Yes |
   And the API should follow RESTful conventions
 ```
 
@@ -307,7 +315,7 @@ describe('Button Component', () => {
   it('handles click events', () => {
     const handleClick = jest.fn();
     render(<Button onClick={handleClick}>Click me</Button>);
-    
+
     fireEvent.click(screen.getByText('Click me'));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
@@ -360,7 +368,7 @@ namespace Braavo.Tests.Features.Documents
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _mapperMock = new Mock<IMapper>();
             _validator = new CreateDocumentCommandValidator();
-            
+
             _handler = new CreateDocumentCommandHandler(
                 _documentRepositoryMock.Object,
                 _projectRepositoryMock.Object,
@@ -474,7 +482,7 @@ using Xunit;
 using Moq;
 using FluentAssertions;
 using AutoMapper;
-using ChatPRD.Core.Features.Documents.Queries;
+using Braavo.Core.Features.Documents.Queries;
 using Braavo.Core.Features.Documents.Handlers;
 using Braavo.Core.Interfaces;
 using Braavo.Core.Entities;
@@ -568,7 +576,7 @@ namespace Braavo.Tests.Features.Documents
     }
 }
 
-// Braavo.Tests/Controllers/DocumentsControllerTests.cs
+// Braavo.Tests/Endpoints/DocumentsEndpointTests.cs
 using Xunit;
 using Moq;
 using FluentAssertions;
@@ -576,14 +584,14 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
-using Braavo.Api.Controllers;
+using Braavo.Api.Endpoints.Documents;
 using Braavo.Core.Features.Documents.Commands;
 using Braavo.Core.Features.Documents.Queries;
 using Braavo.Core.ValueObjects;
 using Braavo.Shared.DTOs;
 using FluentValidation;
 
-namespace Braavo.Tests.Controllers
+namespace Braavo.Tests.Endpoints
 {
     public class DocumentsControllerTests
     {
@@ -594,14 +602,14 @@ namespace Braavo.Tests.Controllers
         {
             _mediatorMock = new Mock<IMediator>();
             _controller = new DocumentsController(_mediatorMock.Object);
-            
+
             // Setup user context
             var userId = Guid.NewGuid();
             var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
                 new Claim("sub", userId.ToString())
             }));
-            
+
             _controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext { User = user }
@@ -698,7 +706,7 @@ using Moq;
 using FluentAssertions;
 using FluentValidation;
 using MediatR;
-using ChatPRD.Core.Behaviors;
+using Braavo.Core.Behaviors;
 using Braavo.Core.Features.Documents.Commands;
 using Braavo.Core.ValueObjects;
 
@@ -740,7 +748,7 @@ namespace Braavo.Tests.Behaviors
             var validator = new Mock<IValidator<CreateDocumentCommand>>();
             var validationFailure = new ValidationFailure("Title", "Title is required");
             var validationResult = new ValidationResult(new[] { validationFailure });
-            
+
             validator.Setup(x => x.ValidateAsync(It.IsAny<CreateDocumentCommand>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(validationResult);
 
@@ -753,7 +761,7 @@ namespace Braavo.Tests.Behaviors
             // Act & Assert
             await behavior.Invoking(x => x.Handle(request, mockNext.Object, CancellationToken.None))
                 .Should().ThrowAsync<ValidationException>();
-            
+
             mockNext.Verify(x => x(), Times.Never);
         }
     }
@@ -966,7 +974,7 @@ export class PerformanceMonitor {
 using Xunit;
 using Moq;
 using FluentAssertions;
-using ChatPRD.Core.UseCases.Documents;
+using Braavo.Core.UseCases.Documents;
 using Braavo.Core.Entities;
 using Braavo.Core.Interfaces;
 using Braavo.Core.ValueObjects;
@@ -1000,7 +1008,7 @@ namespace Braavo.Tests.Core.UseCases
             var userId = new UserId(Guid.NewGuid());
             var projectId = Guid.NewGuid();
             var project = new Project("Test Project", userId);
-            
+
             _mockProjectRepository.Setup(x => x.GetByIdAsync(projectId))
                 .ReturnsAsync(project);
 
@@ -1030,7 +1038,7 @@ namespace Braavo.Tests.Core.UseCases
             // Arrange
             var userId = new UserId(Guid.NewGuid());
             var projectId = Guid.NewGuid();
-            
+
             _mockProjectRepository.Setup(x => x.GetByIdAsync(projectId))
                 .ReturnsAsync((Project?)null);
 
@@ -1057,7 +1065,7 @@ namespace Braavo.Tests.Core.UseCases
             var otherUserId = new UserId(Guid.NewGuid());
             var projectId = Guid.NewGuid();
             var project = new Project("Test Project", otherUserId);
-            
+
             _mockProjectRepository.Setup(x => x.GetByIdAsync(projectId))
                 .ReturnsAsync(project);
 
@@ -1083,7 +1091,7 @@ namespace Braavo.Tests.Core.UseCases
             var userId = new UserId(Guid.NewGuid());
             var projectId = Guid.NewGuid();
             var project = new Project("Test Project", userId);
-            
+
             _mockProjectRepository.Setup(x => x.GetByIdAsync(projectId))
                 .ReturnsAsync(project);
 
@@ -1155,7 +1163,7 @@ namespace Braavo.Tests.Integration
         public async Task InitializeAsync()
         {
             await _postgres.StartAsync();
-            
+
             // Run migrations
             using var scope = _factory.Services.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<BraavoDbContext>();
@@ -1243,7 +1251,7 @@ namespace Braavo.Tests.Integration
 
             var response = await _client.PostAsJsonAsync("/api/auth/login", loginRequest);
             response.EnsureSuccessStatusCode();
-            
+
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<AuthResponse>>();
             return result!.Data!.Token;
         }
@@ -1258,7 +1266,7 @@ namespace Braavo.Tests.Integration
 
             var response = await _client.PostAsJsonAsync("/api/projects", projectRequest);
             response.EnsureSuccessStatusCode();
-            
+
             var result = await response.Content.ReadFromJsonAsync<ApiResponse<ProjectDto>>();
             return result!.Data!.Id;
         }
@@ -1300,14 +1308,14 @@ namespace Braavo.Tests.Infrastructure.Repositories
         public async Task InitializeAsync()
         {
             await _postgres.StartAsync();
-            
+
             var options = new DbContextOptionsBuilder<BraavoDbContext>()
                 .UseNpgsql(_postgres.GetConnectionString())
                 .Options;
 
             _context = new BraavoDbContext(options);
             await _context.Database.MigrateAsync();
-            
+
             _repository = new DocumentRepository(_context);
         }
 
@@ -1344,7 +1352,7 @@ namespace Braavo.Tests.Infrastructure.Repositories
             var userId = new UserId(Guid.NewGuid());
             var projectId = Guid.NewGuid();
             var document = new Document("Test Document", "Test Content", DocumentType.PRD, projectId, userId);
-            
+
             await _context.Documents.AddAsync(document);
             await _context.SaveChangesAsync();
 
@@ -1377,7 +1385,7 @@ namespace Braavo.Tests.Infrastructure.Repositories
             var userId = new UserId(Guid.NewGuid());
             var projectId = Guid.NewGuid();
             var document = new Document("Original Title", "Original Content", DocumentType.PRD, projectId, userId);
-            
+
             await _context.Documents.AddAsync(document);
             await _context.SaveChangesAsync();
 
@@ -1515,7 +1523,7 @@ namespace Braavo.Tests.Performance
             var userId = new UserId(Guid.NewGuid());
             var projectId = Guid.NewGuid();
             var document = new Document("Benchmark Document", "Benchmark Content", DocumentType.PRD, projectId, userId);
-            
+
             await _repository.AddAsync(document);
             await _context.SaveChangesAsync();
         }
@@ -1524,14 +1532,14 @@ namespace Braavo.Tests.Performance
         {
             var documents = new List<Document>();
             var userId = new UserId(Guid.NewGuid());
-            
+
             for (int i = 0; i < count; i++)
             {
                 var projectId = Guid.NewGuid();
                 var document = new Document($"Test Document {i}", $"Content for document {i}", DocumentType.PRD, projectId, userId);
                 documents.Add(document);
             }
-            
+
             return documents;
         }
     }
@@ -1552,7 +1560,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     services:
       postgres:
         image: postgres:15
@@ -1567,38 +1575,38 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '8.0.x'
-    
+
     - name: Restore dependencies
       run: dotnet restore
-    
+
     - name: Build
       run: dotnet build --no-restore
-    
+
     - name: Run Unit Tests
       run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"
-    
+
     - name: Run Integration Tests
       run: dotnet test Tests/Integration --no-build --verbosity normal
       env:
         ConnectionStrings__DefaultConnection: "Host=localhost;Database=braavo_test;Username=postgres;Password=test123"
-    
+
     - name: Run Mutation Tests
       run: |
         dotnet tool install --global dotnet-stryker
         dotnet stryker --config-file stryker-config.json --reporter json
-    
+
     - name: Upload Coverage Reports
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
-    
+
     - name: Upload Mutation Test Results
       uses: actions/upload-artifact@v3
       with:
@@ -1666,9 +1674,9 @@ describe('Security Tests', () => {
     it('prevents unauthorized access to documents', async () => {
       const user1 = await createTestUser('user1@example.com');
       const user2 = await createTestUser('user2@example.com');
-      
+
       const document = await createTestDocument(user1.id);
-      
+
       const response = await request(app)
         .get(`/api/documents/${document.id}`)
         .set('Authorization', `Bearer ${generateTestToken(user2.id)}`)
@@ -1684,7 +1692,7 @@ describe('Security Tests', () => {
 
 ### 7.1 Test Report Template
 ```markdown
-# Test Report - ChatPRD Clone
+# Test Report - Braavo
 
 ## Test Summary
 - **Test Period**: [Date Range]
@@ -1736,4 +1744,4 @@ describe('Security Tests', () => {
 4. Address medium-severity security issues
 ```
 
-This comprehensive testing documentation provides a solid foundation for ensuring the quality and reliability of the ChatPRD Clone platform. The testing strategy covers all aspects of the application from unit tests to end-to-end testing, performance testing, and security testing. 
+This comprehensive testing documentation provides a solid foundation for ensuring the quality and reliability of the Braavo platform. The testing strategy covers all aspects of the application from unit tests to end-to-end testing, performance testing, and security testing.

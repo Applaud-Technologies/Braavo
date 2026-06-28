@@ -6,7 +6,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Monitoring Architecture                       │
+│                    Monitoring Architecture (VPS)                 │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────────┐ │
@@ -18,30 +18,25 @@
 │  └─────────────────────────┬───────────────────────────────────┘ │
 │                            │                                     │
 │  ┌─────────────────────────▼───────────────────────────────────┐ │
-│  │                   Metrics Collection                        │ │
+│  │                   Metrics & Logs Collection                 │ │
 │  │  ┌─────────────────┐    ┌─────────────────┐                │ │
-│  │  │   Prometheus    │    │   CloudWatch    │                │ │
-│  │  │   (Metrics)     │    │   (AWS Metrics) │                │ │
-│  │  └─────────────────┘    └─────────────────┘                │ │
-│  └─────────────────────────┬───────────────────────────────────┘ │
-│                            │                                     │
-│  ┌─────────────────────────▼───────────────────────────────────┐ │
-│  │                   Log Aggregation                           │ │
-│  │  ┌─────────────────┐    ┌─────────────────┐                │ │
-│  │  │   ELK Stack     │    │   CloudWatch    │                │ │
-│  │  │   (Logs)        │    │   (Logs)        │                │ │
+│  │  │   Prometheus    │    │      Loki       │                │ │
+│  │  │   (Metrics)     │    │     (Logs)      │                │ │
 │  │  └─────────────────┘    └─────────────────┘                │ │
 │  └─────────────────────────┬───────────────────────────────────┘ │
 │                            │                                     │
 │  ┌─────────────────────────▼───────────────────────────────────┐ │
 │  │                   Visualization & Alerting                  │ │
 │  │  ┌─────────────────┐    ┌─────────────────┐                │ │
-│  │  │    Grafana      │    │   PagerDuty     │                │ │
+│  │  │    Grafana      │    │  Alertmanager   │                │ │
 │  │  │  (Dashboards)   │    │   (Alerting)    │                │ │
 │  │  └─────────────────┘    └─────────────────┘                │ │
 │  └─────────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+> **MVP Stack:** Prometheus + Loki + Grafana + Alertmanager (all self-hosted via Docker Compose)
+> **Scale:** Add managed observability (Datadog, Grafana Cloud) when operational overhead exceeds self-hosting benefits
 
 ### 1.2 Key Performance Indicators (KPIs)
 
@@ -52,17 +47,17 @@ SLIs (Service Level Indicators):
     - Target: 99.9%
     - Measurement: Uptime percentage over 30 days
     - Alert: < 99.5% availability
-  
+
   Response Time:
     - Target: 95th percentile < 2 seconds
     - Measurement: API endpoint response times
     - Alert: 95th percentile > 5 seconds
-  
+
   Error Rate:
     - Target: < 0.1% of requests
     - Measurement: 5xx errors / total requests
     - Alert: > 1% error rate for 5 minutes
-  
+
   Throughput:
     - Target: Handle 1000 requests/second
     - Measurement: Requests per second
@@ -74,13 +69,13 @@ Business Metrics:
     - Monthly Active Users (MAU)
     - User Retention Rate
     - Feature Adoption Rate
-  
+
   Feature Usage:
     - PRDs Generated per Day
     - Wireframes Created per Day
     - Code Generations per Day
     - API Calls per Feature
-  
+
   Revenue Metrics:
     - Monthly Recurring Revenue (MRR)
     - Customer Acquisition Cost (CAC)
@@ -216,19 +211,19 @@ Change Types:
     - Approval: CTO or on-call engineer
     - Implementation: Immediate
     - Examples: Security patches, critical bugs
-  
+
   Standard:
     - Definition: Pre-approved, low-risk changes
     - Approval: Team lead
     - Implementation: Next deployment window
     - Examples: Feature updates, configuration changes
-  
+
   Major:
     - Definition: High-risk or significant changes
     - Approval: Change Advisory Board
     - Implementation: Planned maintenance window
     - Examples: Architecture changes, major releases
-  
+
   Normal:
     - Definition: Regular business changes
     - Approval: Product manager
@@ -238,153 +233,142 @@ Change Types:
 
 ### 2.2 Release Management
 
-#### Release Process
-```typescript
-// scripts/release-manager.ts
-export interface ReleaseConfig {
-  version: string;
-  environment: 'staging' | 'production';
-  features: string[];
-  bugfixes: string[];
-  breaking_changes: string[];
-  rollback_plan: string;
-}
+#### Release Process (VPS)
+```bash
+#!/bin/bash
+# scripts/release.sh - Production release with safety checks
 
-export class ReleaseManager {
-  async executeRelease(config: ReleaseConfig): Promise<void> {
-    console.log(`Starting release ${config.version} to ${config.environment}`);
-    
-    try {
-      // Pre-release checks
-      await this.preReleaseChecks(config);
-      
-      // Database migrations
-      await this.runMigrations(config);
-      
-      // Deploy application
-      await this.deployApplication(config);
-      
-      // Post-deployment verification
-      await this.verifyDeployment(config);
-      
-      // Update monitoring
-      await this.updateMonitoring(config);
-      
-      console.log(`Release ${config.version} completed successfully`);
-    } catch (error) {
-      console.error(`Release ${config.version} failed:`, error);
-      await this.initiateRollback(config);
-      throw error;
-    }
-  }
+set -euo pipefail
 
-  private async preReleaseChecks(config: ReleaseConfig): Promise<void> {
-    // Health checks
-    await this.runHealthChecks();
-    
-    // Security scan
-    await this.runSecurityScan();
-    
-    // Performance tests
-    await this.runPerformanceTests();
-    
-    // Dependency checks
-    await this.checkDependencies();
-  }
+TAG="${1:?Usage: $0 <tag>}"
+VPS_HOST="${VPS_HOST:-braavo.com}"
+VPS_USER="${VPS_USER:-deploy}"
+DEPLOY_PATH="/opt/braavo"
+BACKUP_DIR="/data/backups"
 
-  private async runMigrations(config: ReleaseConfig): Promise<void> {
-    if (config.environment === 'production') {
-      // Create database backup
-      await this.createDatabaseBackup();
-    }
-    
-    // Run migrations
-    await this.executeMigrations();
-  }
+echo "=== Release $TAG to production ==="
 
-  private async deployApplication(config: ReleaseConfig): Promise<void> {
-    // Blue-green deployment
-    await this.deployToBlueEnvironment(config);
-    await this.runSmokeTests();
-    await this.switchTrafficToBlue();
-  }
+# Pre-release checks (run locally)
+echo "Running pre-release checks..."
+npm run lint --prefix src/Frontend
+npm run test --prefix src/Frontend
+dotnet test src/Backend
 
-  private async verifyDeployment(config: ReleaseConfig): Promise<void> {
-    // Verify all services are healthy
-    await this.checkServiceHealth();
-    
-    // Verify feature flags
-    await this.verifyFeatureFlags();
-    
-    // Run integration tests
-    await this.runIntegrationTests();
-  }
+# Deploy to VPS
+ssh "$VPS_USER@$VPS_HOST" << EOF
+  set -euo pipefail
+  cd $DEPLOY_PATH
 
-  private async initiateRollback(config: ReleaseConfig): Promise<void> {
-    console.log('Initiating rollback procedure...');
-    
-    // Switch traffic back to green environment
-    await this.switchTrafficToGreen();
-    
-    // Rollback database if needed
-    if (config.environment === 'production') {
-      await this.rollbackDatabase();
-    }
-    
-    // Notify stakeholders
-    await this.notifyRollback(config);
-  }
-}
+  echo "Creating pre-deploy backup..."
+  mkdir -p $BACKUP_DIR
+  docker compose exec -T postgres pg_dump -U braavo braavo > "$BACKUP_DIR/pre-deploy-$TAG.sql"
+
+  echo "Pulling new images..."
+  export TAG=$TAG
+  docker compose pull
+
+  echo "Running database migrations..."
+  docker compose run --rm backend dotnet ef database update
+
+  echo "Deploying new version..."
+  docker compose up -d --remove-orphans
+
+  echo "Waiting for services to be healthy..."
+  sleep 15
+
+  # Health checks
+  curl -sf http://localhost:5000/api/health || { echo "Backend health check failed"; exit 1; }
+  curl -sf http://localhost:80 || { echo "Frontend health check failed"; exit 1; }
+
+  # Cleanup old images
+  docker image prune -f
+
+  echo "Deployment successful!"
+EOF
+
+echo "=== Release $TAG completed ==="
+```
+
+#### Release Checklist
+```yaml
+Pre-Release:
+  - [ ] All tests passing in CI
+  - [ ] Code review approved
+  - [ ] Database migrations tested locally
+  - [ ] Release notes prepared
+  - [ ] Rollback plan documented
+
+Deployment:
+  - [ ] Notify team of deployment start
+  - [ ] Run release script
+  - [ ] Verify health checks pass
+  - [ ] Smoke test critical paths
+
+Post-Release:
+  - [ ] Monitor error rates for 30 minutes
+  - [ ] Verify key metrics stable
+  - [ ] Update release notes/changelog
+  - [ ] Notify team of completion
 ```
 
 ### 2.3 Rollback Procedures
 
-#### Automated Rollback
+#### Automated Rollback (VPS)
 ```bash
 #!/bin/bash
 # scripts/rollback.sh
 
-set -e
+set -euo pipefail
 
-ENVIRONMENT=$1
-PREVIOUS_VERSION=$2
+PREVIOUS_TAG="${1:?Usage: $0 <previous_tag>}"
+VPS_HOST="${VPS_HOST:-braavo.com}"
+VPS_USER="${VPS_USER:-deploy}"
+DEPLOY_PATH="/opt/braavo"
+BACKUP_DIR="/data/backups"
 
-if [ -z "$ENVIRONMENT" ] || [ -z "$PREVIOUS_VERSION" ]; then
-    echo "Usage: $0 <environment> <previous_version>"
-    exit 1
+echo "Initiating rollback to version $PREVIOUS_TAG..."
+
+ssh "$VPS_USER@$VPS_HOST" << EOF
+  set -euo pipefail
+  cd $DEPLOY_PATH
+
+  # Set the previous tag
+  export TAG=$PREVIOUS_TAG
+
+  # Pull the previous version
+  docker compose pull
+
+  # Stop current containers
+  docker compose down
+
+  # Restore database if backup exists for this version
+  BACKUP_FILE="$BACKUP_DIR/pre-deploy-\$TAG.sql"
+  if [ -f "\$BACKUP_FILE" ]; then
+    echo "Restoring database from \$BACKUP_FILE..."
+    docker compose up -d postgres
+    sleep 5
+    docker compose exec -T postgres psql -U braavo -d braavo < "\$BACKUP_FILE"
+  fi
+
+  # Start with previous version
+  docker compose up -d
+
+  # Wait for services to be healthy
+  echo "Waiting for services..."
+  sleep 15
+
+  # Health check
+  curl -sf http://localhost:5000/api/health || { echo "Health check failed"; exit 1; }
+EOF
+
+echo "Rollback to $PREVIOUS_TAG completed successfully"
+
+# Notify team (if Slack webhook configured)
+if [ -n "${SLACK_WEBHOOK_URL:-}" ]; then
+  curl -sX POST -H 'Content-type: application/json' \
+    --data "{\"text\":\"🔄 Rollback completed to version $PREVIOUS_TAG\"}" \
+    "$SLACK_WEBHOOK_URL"
 fi
-
-echo "Initiating rollback to version $PREVIOUS_VERSION in $ENVIRONMENT..."
-
-# Stop health checks temporarily
-aws elbv2 modify-target-group --target-group-arn $TARGET_GROUP_ARN --health-check-enabled false
-
-# Deploy previous version
-aws ecs update-service --cluster braavo-$ENVIRONMENT --service braavo-api-$ENVIRONMENT --task-definition braavo-api:$PREVIOUS_VERSION
-
-# Wait for rollback to complete
-aws ecs wait services-stable --cluster braavo-$ENVIRONMENT --services braavo-api-$ENVIRONMENT
-
-# Rollback database if needed
-if [ "$ENVIRONMENT" = "production" ]; then
-    echo "Rolling back database..."
-    # Restore from backup
-    aws rds restore-db-instance-from-db-snapshot --db-instance-identifier braavo-prod-rollback --db-snapshot-identifier braavo-prod-pre-release
-fi
-
-# Re-enable health checks
-aws elbv2 modify-target-group --target-group-arn $TARGET_GROUP_ARN --health-check-enabled true
-
-# Verify rollback
-sleep 30
-curl -f https://api.$ENVIRONMENT.braavo.com/health
-
-echo "Rollback completed successfully"
-
-# Notify team
-curl -X POST -H 'Content-type: application/json' \
-    --data '{"text":"🔄 Rollback completed for '$ENVIRONMENT' environment to version '$PREVIOUS_VERSION'"}' \
-    $SLACK_WEBHOOK_URL
 ```
 
 ## 3. Incident Management
@@ -399,19 +383,19 @@ Severity Levels:
     - Response Time: 15 minutes
     - Resolution Time: 1 hour
     - Examples: Site down, data loss, security breach
-  
+
   P1 - High:
     - Definition: Major feature unavailable
     - Response Time: 1 hour
     - Resolution Time: 4 hours
     - Examples: AI service down, payment processing failure
-  
+
   P2 - Medium:
     - Definition: Minor feature degradation
     - Response Time: 4 hours
     - Resolution Time: 24 hours
     - Examples: Slow response times, UI glitches
-  
+
   P3 - Low:
     - Definition: Minor issues or feature requests
     - Response Time: 1 business day
@@ -435,26 +419,26 @@ export interface Incident {
 export class IncidentManager {
   async createIncident(incident: Incident): Promise<void> {
     console.log(`Creating incident: ${incident.title}`);
-    
+
     // Log incident
     await this.logIncident(incident);
-    
+
     // Notify on-call team
     await this.notifyOnCallTeam(incident);
-    
+
     // Create communication channels
     await this.createIncidentChannel(incident);
-    
+
     // Start status page update
     await this.updateStatusPage(incident);
   }
 
   async escalateIncident(incidentId: string): Promise<void> {
     const incident = await this.getIncident(incidentId);
-    
+
     // Escalate to next level
     await this.notifyEscalationTeam(incident);
-    
+
     // Update incident severity if needed
     if (incident.severity === 'P1') {
       incident.severity = 'P0';
@@ -464,17 +448,17 @@ export class IncidentManager {
 
   async resolveIncident(incidentId: string, resolution: string): Promise<void> {
     const incident = await this.getIncident(incidentId);
-    
+
     // Mark as resolved
     incident.status = 'resolved';
     await this.updateIncident(incident);
-    
+
     // Update status page
     await this.updateStatusPage(incident);
-    
+
     // Schedule post-mortem
     await this.schedulePostMortem(incident);
-    
+
     // Notify stakeholders
     await this.notifyResolution(incident, resolution);
   }
@@ -482,7 +466,7 @@ export class IncidentManager {
   private async logIncident(incident: Incident): Promise<void> {
     // Log to incident management system
     await this.sendToIncidentDB(incident);
-    
+
     // Log to metrics system
     await this.recordIncidentMetrics(incident);
   }
@@ -490,20 +474,20 @@ export class IncidentManager {
   private async notifyOnCallTeam(incident: Incident): Promise<void> {
     // PagerDuty integration
     await this.triggerPagerDutyAlert(incident);
-    
+
     // Slack notification
     await this.sendSlackAlert(incident);
-    
+
     // Email notification
     await this.sendEmailAlert(incident);
   }
 
   private async updateStatusPage(incident: Incident): Promise<void> {
     const statusMessage = this.generateStatusMessage(incident);
-    
+
     // Update status page
     await this.updateStatusPageAPI(statusMessage);
-    
+
     // Notify subscribers
     await this.notifyStatusPageSubscribers(incident);
   }
@@ -611,9 +595,9 @@ export class PerformanceMonitor {
     if (!this.metrics.has(name)) {
       this.metrics.set(name, []);
     }
-    
+
     this.metrics.get(name)!.push(value);
-    
+
     // Check for threshold violations
     this.checkThreshold(name, value);
   }
@@ -627,7 +611,7 @@ export class PerformanceMonitor {
 
   private triggerAlert(metric: string, value: number, threshold: number): void {
     console.warn(`Performance alert: ${metric} (${value}) exceeded threshold (${threshold})`);
-    
+
     // Send to monitoring system
     this.sendToMonitoring({
       type: 'performance_alert',
@@ -670,7 +654,7 @@ export class PerformanceMonitor {
 ```sql
 -- Database performance queries
 -- Slow query identification
-SELECT 
+SELECT
     query,
     mean_time,
     calls,
@@ -682,7 +666,7 @@ ORDER BY mean_time DESC
 LIMIT 10;
 
 -- Index usage analysis
-SELECT 
+SELECT
     schemaname,
     tablename,
     indexname,
@@ -694,7 +678,7 @@ WHERE idx_scan = 0
 ORDER BY schemaname, tablename;
 
 -- Table size analysis
-SELECT 
+SELECT
     schemaname,
     tablename,
     pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
@@ -717,19 +701,19 @@ export class QueryOptimizer {
   ): Promise<T> {
     const now = Date.now();
     const expiry = this.cacheExpiry.get(key);
-    
+
     // Check cache validity
     if (expiry && now < expiry && this.queryCache.has(key)) {
       return this.queryCache.get(key);
     }
-    
+
     // Execute query
     const result = await queryFn();
-    
+
     // Cache result
     this.queryCache.set(key, result);
     this.cacheExpiry.set(key, now + ttl);
-    
+
     return result;
   }
 
@@ -772,7 +756,7 @@ export class SecurityMonitor {
 
   recordSecurityEvent(event: SecurityEvent): void {
     this.securityEvents.push(event);
-    
+
     // Check for suspicious patterns
     this.analyzeSecurityEvent(event);
   }
@@ -794,9 +778,9 @@ export class SecurityMonitor {
   private handleFailedLogin(event: SecurityEvent): void {
     const ip = event.sourceIP;
     const attempts = this.failedLoginAttempts.get(ip) || 0;
-    
+
     this.failedLoginAttempts.set(ip, attempts + 1);
-    
+
     if (attempts >= 5) {
       this.blockIP(ip);
       this.alertSecurityTeam(event);
@@ -805,7 +789,7 @@ export class SecurityMonitor {
 
   private blockIP(ip: string): void {
     this.suspiciousIPs.add(ip);
-    
+
     // Add to rate limiter blacklist
     this.addToBlacklist(ip);
   }
@@ -847,7 +831,7 @@ on:
 jobs:
   security-scan:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -892,13 +876,13 @@ Technical Documentation:
     - Endpoint descriptions
     - Request/response examples
     - Authentication guides
-  
+
   Architecture Documentation:
     - System architecture diagrams
     - Database schemas
     - Integration patterns
     - Deployment guides
-  
+
   Operational Documentation:
     - Runbooks and procedures
     - Troubleshooting guides
@@ -911,7 +895,7 @@ User Documentation:
     - Best practices
     - FAQ sections
     - Video tutorials
-  
+
   API Documentation:
     - SDK documentation
     - Code examples
@@ -938,20 +922,20 @@ import { generateUserDocs } from './user-docs-generator';
 export class DocumentationGenerator {
   async generateAllDocs(): Promise<void> {
     console.log('Generating documentation...');
-    
+
     try {
       // Generate API documentation
       await generateApiDocs();
-      
+
       // Generate architecture documentation
       await generateArchitectureDocs();
-      
+
       // Generate user documentation
       await generateUserDocs();
-      
+
       // Update documentation site
       await this.updateDocumentationSite();
-      
+
       console.log('Documentation generation completed');
     } catch (error) {
       console.error('Documentation generation failed:', error);
@@ -962,7 +946,7 @@ export class DocumentationGenerator {
   private async updateDocumentationSite(): Promise<void> {
     // Build documentation site
     await this.buildDocumentationSite();
-    
+
     // Deploy to documentation hosting
     await this.deployDocumentation();
   }
@@ -973,14 +957,14 @@ export const setupDocumentationHooks = (): void => {
   // Listen for code changes
   process.on('code_change', async (files: string[]) => {
     const generator = new DocumentationGenerator();
-    
+
     // Check if documentation needs updating
-    const needsUpdate = files.some(file => 
-      file.includes('src/') || 
-      file.includes('api/') || 
+    const needsUpdate = files.some(file =>
+      file.includes('src/') ||
+      file.includes('api/') ||
       file.includes('schema/')
     );
-    
+
     if (needsUpdate) {
       await generator.generateAllDocs();
     }
@@ -1015,9 +999,9 @@ export class CapacityMonitor {
     if (!this.resourceMetrics.has(resource)) {
       this.resourceMetrics.set(resource, []);
     }
-    
+
     this.resourceMetrics.get(resource)!.push(metric);
-    
+
     // Check capacity thresholds
     this.checkCapacityThreshold(resource, metric);
   }
@@ -1031,7 +1015,7 @@ export class CapacityMonitor {
 
   private triggerCapacityAlert(resource: string, metric: ResourceMetric, threshold: number): void {
     console.warn(`Capacity alert: ${resource} utilization (${metric.utilization}%) exceeded threshold (${threshold}%)`);
-    
+
     // Send capacity planning alert
     this.sendCapacityAlert({
       resource,
@@ -1045,11 +1029,11 @@ export class CapacityMonitor {
   private calculateProjectedCapacity(resource: string): number {
     const metrics = this.resourceMetrics.get(resource) || [];
     if (metrics.length < 2) return 0;
-    
+
     // Calculate trend
     const recent = metrics.slice(-24); // Last 24 hours
     const trend = this.calculateTrend(recent);
-    
+
     // Project capacity for next 7 days
     return trend * 7 * 24;
   }
@@ -1089,7 +1073,7 @@ auto_scaling:
     target_memory_utilization: 80
     scale_up_cooldown: 300
     scale_down_cooldown: 600
-    
+
   backend:
     min_instances: 3
     max_instances: 20
@@ -1097,18 +1081,18 @@ auto_scaling:
     target_memory_utilization: 80
     scale_up_cooldown: 300
     scale_down_cooldown: 600
-    
+
   database:
     read_replicas:
       min: 1
       max: 5
       cpu_threshold: 80
       connection_threshold: 80
-    
+
     storage:
       auto_scaling: true
       max_capacity: 1000
       target_utilization: 75
 ```
 
-This comprehensive maintenance documentation provides the operational framework needed to keep the ChatPRD Clone platform running smoothly, secure, and performing optimally in production environments. 
+This comprehensive maintenance documentation provides the operational framework needed to keep the Braavo platform running smoothly, secure, and performing optimally in production environments.
