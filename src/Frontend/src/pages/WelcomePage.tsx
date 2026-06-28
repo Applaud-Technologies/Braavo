@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../store/hooks';
+import type { RootState } from '../store/store';
 
 export function WelcomePage() {
   const navigate = useNavigate();
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state: RootState) => state.auth.user);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">

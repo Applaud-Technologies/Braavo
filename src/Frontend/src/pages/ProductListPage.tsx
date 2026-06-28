@@ -1,13 +1,15 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
+import type { RootState } from '../store/store';
 import { fetchProducts } from '../store/slices/productsSlice';
+import type { ProductSummary } from '../api/products';
 import { ProductCard } from '../components/products/ProductCard';
 
 export function ProductListPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { items, loading, error } = useAppSelector((state) => state.products);
+  const { items, loading, error } = useAppSelector((state: RootState) => state.products);
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -53,7 +55,7 @@ export function ProductListPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map((product) => (
+          {items.map((product: ProductSummary) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
