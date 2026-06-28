@@ -6,33 +6,44 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const statusColors: Record<string, string> = {
-    Draft: 'bg-gray-100 text-gray-800',
-    InProgress: 'bg-blue-100 text-blue-800',
-    Review: 'bg-yellow-100 text-yellow-800',
-    Final: 'bg-green-100 text-green-800',
+  const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
+    Draft: { bg: 'bg-stone-100', text: 'text-stone-600', label: 'Draft' },
+    InProgress: { bg: 'bg-amber-100', text: 'text-amber-800', label: 'In Progress' },
+    Review: { bg: 'bg-sky-100', text: 'text-sky-800', label: 'Review' },
+    Final: { bg: 'bg-emerald-100', text: 'text-emerald-800', label: 'Complete' },
   };
+
+  const status = statusConfig[product.status] ?? statusConfig.Draft;
 
   return (
     <Link
       to={`/products/${product.id}`}
-      className="block p-6 bg-white rounded-lg border border-gray-200 hover:border-blue-500 transition-colors"
+      className="card-hover block p-6 group"
     >
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="text-lg font-semibold text-gray-900">{product.name}</h3>
-        <span className={`px-2 py-1 text-xs rounded-full ${statusColors[product.status] ?? statusColors.Draft}`}>
-          {product.status}
+      <div className="flex justify-between items-start mb-3">
+        <h3 className="text-lg font-display font-semibold text-stone-800 group-hover:text-primary-700 transition-colors">
+          {product.name}
+        </h3>
+        <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${status.bg} ${status.text}`}>
+          {status.label}
         </span>
       </div>
-      <p className="text-gray-600 text-sm mb-4 line-clamp-2">{product.description}</p>
-      <div className="flex justify-between items-center">
-        <div className="w-full bg-gray-200 rounded-full h-2">
+
+      <p className="text-stone-500 text-sm mb-5 line-clamp-2 leading-relaxed">
+        {product.description || 'No description yet'}
+      </p>
+
+      <div className="space-y-2">
+        <div className="flex justify-between items-center text-xs">
+          <span className="text-stone-400 font-medium uppercase tracking-wide">Progress</span>
+          <span className="text-stone-600 font-semibold">{product.completionPercentage}%</span>
+        </div>
+        <div className="w-full bg-stone-200 rounded-full h-1.5 overflow-hidden">
           <div
-            className="bg-blue-600 h-2 rounded-full"
+            className="bg-gradient-to-r from-primary-500 to-primary-600 h-full rounded-full transition-all duration-500"
             style={{ width: `${product.completionPercentage}%` }}
           />
         </div>
-        <span className="ml-2 text-sm text-gray-500">{product.completionPercentage}%</span>
       </div>
     </Link>
   );
