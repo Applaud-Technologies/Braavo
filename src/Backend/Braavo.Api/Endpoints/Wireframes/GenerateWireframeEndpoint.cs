@@ -20,13 +20,22 @@ public class GenerateWireframeEndpoint : Endpoint<WireframeRequest, WireframeRes
 
     public override async Task HandleAsync(WireframeRequest req, CancellationToken ct)
     {
-        var command = new GenerateWireframeCommand(req.DocumentId, req.ScreenName, req.Fidelity);
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+        {
+            await SendUnauthorizedAsync(ct);
+            return;
+        }
+
+        var command = new GenerateWireframeCommand(req.DocumentId, userId, req.ScreenName, req.Fidelity);
         var result = await _mediator.Send(command, ct);
 
         if (result.Success)
             await SendOkAsync(result, ct);
         else if (result.Error == "Document not found")
             await SendNotFoundAsync(ct);
+        else if (result.Error == "Forbidden")
+            await SendForbiddenAsync(ct);
         else
             await SendAsync(result, 500, ct);
     }

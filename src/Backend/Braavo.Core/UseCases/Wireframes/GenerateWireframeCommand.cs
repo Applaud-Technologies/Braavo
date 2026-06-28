@@ -4,8 +4,9 @@ namespace Braavo.Core.UseCases.Wireframes;
 
 public record GenerateWireframeCommand(
     Guid DocumentId,
-    string? ScreenName,
-    string Fidelity = "low"
+    Guid UserId,
+    string? ScreenName = null,
+    string Fidelity = "medium"
 ) : IRequest<WireframeResponse>;
 
 public record WireframeResponse(

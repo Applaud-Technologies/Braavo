@@ -21,6 +21,9 @@ public class GenerateWireframeHandler : IRequestHandler<GenerateWireframeCommand
         if (document is null)
             return new WireframeResponse("", "", false, "Document not found");
 
+        if (document.CreatedBy.Value != request.UserId)
+            return new WireframeResponse("", "", false, "Forbidden");
+
         var systemPrompt = GetSystemPrompt(request.Fidelity);
         var userPrompt = BuildUserPrompt(document.Content, request.ScreenName);
 

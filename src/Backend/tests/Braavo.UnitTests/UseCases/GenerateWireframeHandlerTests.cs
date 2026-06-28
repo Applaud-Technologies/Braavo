@@ -13,7 +13,8 @@ public class GenerateWireframeHandlerTests
     [Fact]
     public async Task Handle_GeneratesHtmlWireframe()
     {
-        var document = Document.Create("Test PRD", DocumentType.Prd, Guid.NewGuid(), UserId.New());
+        var userId = UserId.New();
+        var document = Document.Create("Test PRD", DocumentType.Prd, Guid.NewGuid(), userId);
         document.UpdateContent("# PRD\n## Features\n- Login form\n- Dashboard");
 
         var documentRepo = Substitute.For<IDocumentRepository>();
@@ -24,7 +25,7 @@ public class GenerateWireframeHandlerTests
             .Returns(new LlmResponse("<div class='wireframe'><h1>Login</h1></div>", 100, 200, true));
 
         var handler = new GenerateWireframeHandler(llmProvider, documentRepo);
-        var command = new GenerateWireframeCommand(Guid.NewGuid(), "Login Screen", "low");
+        var command = new GenerateWireframeCommand(Guid.NewGuid(), userId.Value, "Login Screen", "low");
 
         var result = await handler.Handle(command, CancellationToken.None);
 
