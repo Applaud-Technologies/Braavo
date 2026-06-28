@@ -17,12 +17,17 @@ public class GenerateGanttEndpoint : EndpointWithoutRequest<GenerateGanttResult>
     public override void Configure()
     {
         Post("/api/products/{productId}/diagrams/gantt");
-        Claims(ClaimTypes.NameIdentifier);
+        Policies("Authenticated");
     }
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userIdStr is null || !Guid.TryParse(userIdStr, out var userId))
+        {
+            await SendUnauthorizedAsync(ct);
+            return;
+        }
         var productId = Route<Guid>("productId");
 
         var command = new GenerateGanttCommand(productId, userId);
