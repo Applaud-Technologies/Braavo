@@ -3,10 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchPersonas, createPersona, updatePersona, deletePersona } from '../store/slices/personasSlice';
 import { fetchProduct } from '../store/slices/productsSlice';
+import { generatePersona, clearSuggestedPersona } from '../store/slices/aiSlice';
 import type { RootState } from '../store/store';
 import type { Persona, CreatePersonaRequest } from '../api/personas';
 import { PersonaCard } from '../components/prd/PersonaCard';
 import { PersonaEditor } from '../components/prd/PersonaEditor';
+import AIButton from '../components/ai/AIButton';
+import AISuggestionCard from '../components/ai/AISuggestionCard';
 
 export function PersonasPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,9 +18,11 @@ export function PersonasPage() {
 
   const { items: personas, loading, error } = useAppSelector((state: RootState) => state.personas);
   const { currentProduct } = useAppSelector((state: RootState) => state.products);
+  const { suggestedPersona, loading: aiLoading } = useAppSelector((state: RootState) => state.ai);
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingPersona, setEditingPersona] = useState<Persona | undefined>(undefined);
+  const [aiDescription, setAiDescription] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Persona | null>(null);
   const [deleteConfirming, setDeleteConfirming] = useState(false);
 
@@ -46,13 +51,27 @@ export function PersonasPage() {
   const handleSave = async (data: CreatePersonaRequest) => {
     if (!id) return;
 
-    if (editingPersona) {
+    if (editingPersona?.id) {
       await dispatch(updatePersona({ productId: id, personaId: editingPersona.id, data })).unwrap();
     } else {
       await dispatch(createPersona({ productId: id, data })).unwrap();
     }
 
     handleCloseEditor();
+  };
+
+  const handleGeneratePersona = () => {
+    if (id && aiDescription.trim()) {
+      dispatch(generatePersona({ productId: id, description: aiDescription.trim() }));
+    }
+  };
+
+  const handleAcceptPersona = () => {
+    if (suggestedPersona) {
+      setEditingPersona({ ...suggestedPersona, id: '', sortOrder: 0 });
+      setEditorOpen(true);
+      dispatch(clearSuggestedPersona());
+    }
   };
 
   const handleDeleteRequest = (persona: Persona) => {
@@ -120,6 +139,54 @@ export function PersonasPage() {
             <p className="mt-1">{error}</p>
           </div>
         )}
+
+        {/* AI Generate section */}
+        <div className="card p-6 mb-8">
+          <h3 className="font-display font-semibold text-lg mb-4">Generate Persona with AI</h3>
+          <div className="flex gap-4">
+            <input
+              type="text"
+              value={aiDescription}
+              onChange={(e) => setAiDescription(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleGeneratePersona()}
+              placeholder="Describe a user type (e.g., 'A busy project manager who needs to track multiple projects')"
+              className="input flex-1"
+            />
+            <AIButton
+              onClick={handleGeneratePersona}
+              loading={aiLoading}
+              disabled={!aiDescription.trim()}
+            >
+              Generate
+            </AIButton>
+          </div>
+
+          {suggestedPersona && (
+            <div className="mt-4">
+              <AISuggestionCard
+                title={suggestedPersona.name}
+                onAccept={handleAcceptPersona}
+                onReject={() => dispatch(clearSuggestedPersona())}
+                acceptLabel="Open in Editor"
+              >
+                <p className="text-stone-600">{suggestedPersona.role}</p>
+                {suggestedPersona.goals.length > 0 && (
+                  <p className="text-sm text-stone-500 mt-2">
+                    Goals: {suggestedPersona.goals.join(', ')}
+                  </p>
+                )}
+                {suggestedPersona.painPoints.length > 0 && (
+                  <p className="text-sm text-stone-500 mt-1">
+                    Pain points: {suggestedPersona.painPoints.join(', ')}
+                  </p>
+                )}
+                {suggestedPersona.quote && (
+                  <p className="text-sm text-stone-400 italic mt-2">"{suggestedPersona.quote}"</p>
+                )}
+              </AISuggestionCard>
+            </div>
+          )}
+        </div>
 
         {/* Empty state */}
         {!loading && personas.length === 0 && !error && (
