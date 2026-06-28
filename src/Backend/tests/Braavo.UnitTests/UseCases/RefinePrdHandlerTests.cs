@@ -1,0 +1,36 @@
+using Braavo.Core.Entities;
+using Braavo.Core.Interfaces;
+using Braavo.Core.Models;
+using Braavo.Core.UseCases.Prd;
+using Braavo.Core.ValueObjects;
+using FluentAssertions;
+using NSubstitute;
+
+namespace Braavo.UnitTests.UseCases;
+
+public class RefinePrdHandlerTests
+{
+    [Fact]
+    public async Task Handle_UpdatesDocumentContent()
+    {
+        var documentId = Guid.NewGuid();
+        var document = Document.Create("Test PRD", DocumentType.Prd, Guid.NewGuid(), UserId.New());
+        document.UpdateContent("# Original PRD\n\n## Features\n- Feature 1");
+
+        var documentRepo = Substitute.For<IDocumentRepository>();
+        documentRepo.GetByIdAsync(documentId, Arg.Any<CancellationToken>()).Returns(document);
+
+        var llmProvider = Substitute.For<ILlmProvider>();
+        llmProvider.GenerateAsync(Arg.Any<LlmRequest>(), Arg.Any<CancellationToken>())
+            .Returns(new LlmResponse("# Refined PRD\n\n## Features\n- Feature 1\n- Feature 2", 100, 200, true));
+
+        var handler = new RefinePrdHandler(llmProvider, documentRepo);
+        var command = new RefinePrdCommand(documentId, "Add another feature", Guid.NewGuid());
+
+        var result = await handler.Handle(command, CancellationToken.None);
+
+        result.Success.Should().BeTrue();
+        result.Content.Should().Contain("Feature 2");
+        await documentRepo.Received(1).UpdateAsync(Arg.Any<Document>(), Arg.Any<CancellationToken>());
+    }
+}
