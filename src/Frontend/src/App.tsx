@@ -1,18 +1,27 @@
 import { Provider } from 'react-redux';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { store } from './store/store';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
+import ChatPage from './pages/ChatPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function Dashboard() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-primary-600 text-white p-4">
         <h1 className="text-2xl font-bold">Braavo</h1>
       </header>
-      <main className="container mx-auto p-4">
-        <p className="text-gray-700">Welcome to Braavo!</p>
+      <main className="container mx-auto p-8">
+        <h2 className="text-xl font-semibold mb-4">Welcome to Braavo!</h2>
+        <button
+          onClick={() => navigate('/chat')}
+          className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+        >
+          Start New PRD
+        </button>
       </main>
     </div>
   );
@@ -30,6 +39,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <ProtectedRoute>
+                <ChatPage />
               </ProtectedRoute>
             }
           />

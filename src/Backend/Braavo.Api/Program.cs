@@ -1,5 +1,6 @@
 // src/Backend/Braavo.Api/Program.cs
 using System.Text;
+using Braavo.Core.UseCases.Chat;
 using Braavo.Infrastructure;
 using FastEndpoints;
 using FastEndpoints.Swagger;
@@ -11,6 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddFastEndpoints();
 builder.Services.SwaggerDocument();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(SendChatMessageCommand).Assembly));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -28,7 +32,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Authenticated", policy => policy.RequireAuthenticatedUser());
+});
 
 var app = builder.Build();
 
