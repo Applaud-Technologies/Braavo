@@ -1,0 +1,41 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "Braavo Chat" [level=1] [ref=e5]
+    - paragraph [ref=e6]: Describe your product idea to generate a PRD
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - paragraph [ref=e18]: Build a task management app for remote teams with Kanban boards and Slack integration
+      - generic [ref=e21]:
+        - heading "Product Requirements Document" [level=1] [ref=e22]
+        - heading "Overview" [level=2] [ref=e23]
+        - paragraph [ref=e24]: "Based on your idea: \"Build a task management app for remote teams with ...\""
+        - heading "Problem Statement" [level=2] [ref=e25]
+        - paragraph [ref=e26]: Users need a solution that addresses the core challenge described.
+        - heading "Target Users" [level=2] [ref=e27]
+        - list [ref=e28]:
+          - listitem [ref=e29]: "Primary: End users who will benefit from this solution"
+          - listitem [ref=e30]: "Secondary: Administrators and power users"
+        - heading "Features" [level=2] [ref=e31]
+        - list [ref=e32]:
+          - listitem [ref=e33]:
+            - strong [ref=e34]: Core Feature
+            - text: "- The main functionality"
+          - listitem [ref=e35]:
+            - strong [ref=e36]: Supporting Feature
+            - text: "- Enhances the core experience"
+          - listitem [ref=e37]:
+            - strong [ref=e38]: Analytics
+            - text: "- Track usage and outcomes"
+        - heading "Success Metrics" [level=2] [ref=e39]
+        - list [ref=e40]:
+          - listitem [ref=e41]: User adoption rate > 50%
+          - listitem [ref=e42]: Task completion time reduced by 30%
+          - listitem [ref=e43]: User satisfaction score > 4.0/5.0
+        - heading "User Stories" [level=2] [ref=e44]
+        - list [ref=e45]:
+          - listitem [ref=e46]: As a user, I want to easily accomplish my goal
+          - listitem [ref=e47]: As a user, I want to track my progress
+          - listitem [ref=e48]: As an admin, I want to manage user access
+  - generic [ref=e13]:
+    - textbox "Describe your product idea..." [ref=e14]
+    - button "Send" [disabled] [ref=e15]

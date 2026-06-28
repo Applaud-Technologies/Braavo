@@ -1,0 +1,11 @@
+- generic [ref=e39]:
+  - banner [ref=e40]:
+    - heading "Braavo Chat" [level=1] [ref=e41]
+    - paragraph [ref=e42]: Describe your product idea to generate a PRD
+  - main [ref=e43]:
+    - generic [ref=e44]:
+      - paragraph [ref=e54]: I want to build a task management app for remote teams that includes real-time collaboration, Kanban boards, and integrations with Slack and GitHub.
+      - paragraph [ref=e58]: Sorry, something went wrong. Please try again.
+  - generic [ref=e49]:
+    - textbox "Describe your product idea..." [ref=e50]
+    - button "Send" [disabled] [ref=e51]

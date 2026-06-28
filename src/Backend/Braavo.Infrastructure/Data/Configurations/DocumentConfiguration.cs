@@ -15,7 +15,7 @@ public class DocumentConfiguration : IEntityTypeConfiguration<Document>
         builder.Property(d => d.Id).HasColumnName("id");
         builder.Property(d => d.ProjectId).HasColumnName("project_id");
         builder.Property(d => d.Title).HasColumnName("title").HasMaxLength(255).IsRequired();
-        builder.Property(d => d.Content).HasColumnName("content").HasColumnType("jsonb");
+        builder.Property(d => d.Content).HasColumnName("content").HasColumnType("text");
         builder.Property(d => d.Type).HasColumnName("type").HasConversion<string>();
         builder.Property(d => d.Version).HasColumnName("version");
         builder.Property(d => d.CreatedBy)

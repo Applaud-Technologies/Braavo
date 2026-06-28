@@ -1,0 +1,11 @@
+- generic [ref=e39]:
+  - banner [ref=e40]:
+    - heading "Braavo Chat" [level=1] [ref=e41]
+    - paragraph [ref=e42]: Describe your product idea to generate a PRD
+  - main [ref=e43]:
+    - generic [ref=e45]:
+      - heading "Welcome to Braavo" [level=2] [ref=e46]
+      - paragraph [ref=e47]: Start by describing your product idea below.
+  - generic [ref=e49]:
+    - textbox "Describe your product idea..." [ref=e50]
+    - button "Send" [disabled] [ref=e51]
