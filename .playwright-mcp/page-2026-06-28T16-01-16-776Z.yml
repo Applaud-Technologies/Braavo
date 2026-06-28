@@ -1,6 +1,0 @@
-- generic [ref=e33]:
-  - banner [ref=e34]:
-    - heading "Braavo" [level=1] [ref=e35]
-  - main [ref=e36]:
-    - heading "Welcome to Braavo!" [level=2] [ref=e37]
-    - button "Start New PRD" [ref=e38] [cursor=pointer]

@@ -1,0 +1,15 @@
+- generic [ref=e4]:
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - heading "Your Products" [level=1] [ref=e7]
+      - paragraph [ref=e8]: Manage your product requirement documents
+    - button "+ New Product" [ref=e9] [cursor=pointer]
+  - link "Todo app Draft A todo app Progress 0%" [ref=e11] [cursor=pointer]:
+    - /url: /products/394e6753-899e-4a34-a850-b6f844ef3a11
+    - generic [ref=e12]:
+      - heading "Todo app" [level=3] [ref=e13]
+      - generic [ref=e14]: Draft
+    - paragraph [ref=e15]: A todo app
+    - generic [ref=e17]:
+      - generic [ref=e18]: Progress
+      - generic [ref=e19]: 0%

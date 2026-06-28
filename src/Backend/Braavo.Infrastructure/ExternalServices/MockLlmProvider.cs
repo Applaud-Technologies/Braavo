@@ -7,13 +7,85 @@ public class MockLlmProvider : ILlmProvider
 {
     public Task<LlmResponse> GenerateAsync(LlmRequest request, CancellationToken ct = default)
     {
+        var content = request.SystemPrompt switch
+        {
+            var s when s?.Contains("user persona") == true => GenerateMockPersona(request.Prompt),
+            var s when s?.Contains("user stories") == true => GenerateMockStories(),
+            var s when s?.Contains("features") == true => GenerateMockFeatures(),
+            var s when s?.Contains("refine") == true || s?.Contains("improve") == true => GenerateMockRefinement(request.Prompt),
+            _ => GenerateMockPrd(request.Prompt)
+        };
+
         var response = new LlmResponse(
-            Content: GenerateMockPrd(request.Prompt),
+            Content: content,
             PromptTokens: request.Prompt.Length / 4,
             CompletionTokens: 500,
             Success: true
         );
         return Task.FromResult(response);
+    }
+
+    private static string GenerateMockPersona(string description)
+    {
+        return """
+        {
+          "name": "Alex Thompson",
+          "role": "Product Manager",
+          "technicalLevel": "Medium",
+          "goals": ["Streamline project workflows", "Improve team collaboration", "Track project metrics effectively"],
+          "painPoints": ["Too many disconnected tools", "Difficulty getting status updates", "Manual reporting processes"],
+          "quote": "I need a single place to see everything happening across my projects."
+        }
+        """;
+    }
+
+    private static string GenerateMockStories()
+    {
+        return """
+        [
+          {
+            "asA": "Product Manager",
+            "iWant": "to view all project statuses on a single dashboard",
+            "soThat": "I can quickly identify blockers and priorities",
+            "priority": "Must",
+            "acceptanceCriteria": ["Dashboard loads in under 2 seconds", "Shows status for all assigned projects", "Updates in real-time"]
+          },
+          {
+            "asA": "Product Manager",
+            "iWant": "to generate reports with one click",
+            "soThat": "I can share progress with stakeholders without manual work",
+            "priority": "Should",
+            "acceptanceCriteria": ["Export to PDF and CSV", "Include charts and metrics", "Customizable date ranges"]
+          }
+        ]
+        """;
+    }
+
+    private static string GenerateMockFeatures()
+    {
+        return """
+        [
+          {
+            "name": "Project Dashboard",
+            "description": "Centralized view of all project statuses, metrics, and blockers",
+            "phase": "Mvp",
+            "effort": "Medium",
+            "linkedStoryIds": []
+          },
+          {
+            "name": "One-Click Reports",
+            "description": "Generate and export project reports with customizable templates",
+            "phase": "Enhanced",
+            "effort": "Large",
+            "linkedStoryIds": []
+          }
+        ]
+        """;
+    }
+
+    private static string GenerateMockRefinement(string content)
+    {
+        return $"Improved: {content.Trim()}. This version is more specific, actionable, and measurable.";
     }
 
     public Task<IAsyncEnumerable<string>> StreamAsync(LlmRequest request, CancellationToken ct = default)
