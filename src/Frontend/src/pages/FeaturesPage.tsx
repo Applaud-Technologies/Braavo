@@ -3,10 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchFeatures, createFeature, updateFeature, deleteFeature, moveFeature } from '../store/slices/featuresSlice';
 import { fetchProduct } from '../store/slices/productsSlice';
+import { suggestFeatures, removeSuggestedFeature } from '../store/slices/aiSlice';
 import type { RootState } from '../store/store';
 import type { Feature, CreateFeatureRequest, FeaturePhase } from '../api/features';
+import type { SuggestedFeature } from '../api/ai';
 import { FeatureBoard } from '../components/prd/FeatureBoard';
 import { FeatureEditor } from '../components/prd/FeatureEditor';
+import AIButton from '../components/ai/AIButton';
+import AISuggestionCard from '../components/ai/AISuggestionCard';
 
 export function FeaturesPage() {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +19,13 @@ export function FeaturesPage() {
 
   const { items: features, loading, error } = useAppSelector((state: RootState) => state.features);
   const { currentProduct } = useAppSelector((state: RootState) => state.products);
+  const { suggestedFeatures, loading: aiLoading } = useAppSelector((state: RootState) => state.ai);
+
+  const phaseColors: Record<string, string> = {
+    Mvp: 'bg-emerald-100 text-emerald-800',
+    Enhanced: 'bg-amber-100 text-amber-800',
+    Future: 'bg-sky-100 text-sky-800',
+  };
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingFeature, setEditingFeature] = useState<Feature | undefined>(undefined);
@@ -59,6 +70,27 @@ export function FeaturesPage() {
     if (!id) return;
     if (!window.confirm('Delete this feature?')) return;
     await dispatch(deleteFeature({ productId: id, featureId })).unwrap();
+  };
+
+  const handleSuggestFeatures = () => {
+    if (id) {
+      dispatch(suggestFeatures({ productId: id }));
+    }
+  };
+
+  const handleAcceptFeature = (feature: SuggestedFeature, index: number) => {
+    setEditingFeature({
+      id: '',
+      name: feature.name,
+      description: feature.description,
+      phase: feature.phase,
+      effort: feature.effort,
+      linkedStoryIds: feature.linkedStoryIds,
+      sortOrder: 0,
+    });
+    setDefaultPhase(feature.phase as FeaturePhase);
+    setEditorOpen(true);
+    dispatch(removeSuggestedFeature(index));
   };
 
   const handleMoveFeature = async (featureId: string, phase: FeaturePhase) => {
@@ -114,6 +146,38 @@ export function FeaturesPage() {
         <p className="text-stone-400 text-sm mb-8">
           Drag features between phases to reprioritize
         </p>
+
+        {/* AI Suggest Features */}
+        <div className="card p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-display font-semibold text-lg">Suggest Features with AI</h3>
+              <p className="text-sm text-stone-500">Analyzes your user stories to suggest features</p>
+            </div>
+            <AIButton onClick={handleSuggestFeatures} loading={aiLoading}>
+              Suggest Features
+            </AIButton>
+          </div>
+
+          {suggestedFeatures.length > 0 && (
+            <div className="space-y-4 mt-4">
+              {suggestedFeatures.map((feature, i) => (
+                <AISuggestionCard
+                  key={i}
+                  title={feature.name}
+                  onAccept={() => handleAcceptFeature(feature, i)}
+                  onReject={() => dispatch(removeSuggestedFeature(i))}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`badge ${phaseColors[feature.phase] ?? ''}`}>{feature.phase}</span>
+                    {feature.effort && <span className="badge badge-draft">{feature.effort}</span>}
+                  </div>
+                  <p className="text-stone-600">{feature.description}</p>
+                </AISuggestionCard>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Error state */}
         {error && (
