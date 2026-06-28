@@ -3,7 +3,7 @@ using FluentAssertions;
 
 namespace Braavo.UnitTests.UseCases;
 
-public class ParsePrdHandlerTests
+public class PrdParserTests
 {
     [Fact]
     public void Parse_ExtractsTitle()
