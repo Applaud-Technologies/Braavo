@@ -11,7 +11,8 @@ public record GenerateUserJourneyCommand(Guid ProductId, Guid UserId, Guid? Pers
 public record GenerateUserJourneyResult(
     bool Success,
     string? MermaidCode = null,
-    string? Error = null
+    string? Error = null,
+    bool IsUnprocessableEntity = false
 );
 
 public class GenerateUserJourneyHandler : IRequestHandler<GenerateUserJourneyCommand, GenerateUserJourneyResult>
@@ -55,7 +56,7 @@ public class GenerateUserJourneyHandler : IRequestHandler<GenerateUserJourneyCom
         }
 
         if (stories.Count == 0)
-            return new GenerateUserJourneyResult(false, Error: "No user stories found");
+            return new GenerateUserJourneyResult(false, Error: "No user stories found", IsUnprocessableEntity: true);
 
         var orderedStories = stories.OrderBy(s => s.SortOrder).ThenBy(s => s.CreatedAt).ToList();
         var mermaidCode = GenerateMermaidUserJourney(actorLabel, orderedStories);

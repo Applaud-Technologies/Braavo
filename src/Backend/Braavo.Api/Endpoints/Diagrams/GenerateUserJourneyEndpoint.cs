@@ -38,7 +38,7 @@ public class GenerateUserJourneyEndpoint : Endpoint<GenerateUserJourneyRequest, 
 
         if (!result.Success)
         {
-            var statusCode = result.Error == "No user stories found" ? 422 : 404;
+            var statusCode = result.IsUnprocessableEntity ? 422 : 404;
             await SendAsync(result, statusCode, ct);
             return;
         }
