@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChatPage from './pages/ChatPage';
 import WireframePage from './pages/WireframePage';
+import { WelcomePage } from './pages/WelcomePage';
+import { ProductListPage } from './pages/ProductListPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function Dashboard() {
@@ -56,6 +58,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <WireframePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/welcome"
+            element={
+              <ProtectedRoute>
+                <WelcomePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/products"
+            element={
+              <ProtectedRoute>
+                <ProductListPage />
               </ProtectedRoute>
             }
           />
