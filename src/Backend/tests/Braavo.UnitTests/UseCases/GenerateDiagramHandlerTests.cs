@@ -13,7 +13,8 @@ public class GenerateDiagramHandlerTests
     [Fact]
     public async Task Handle_GeneratesFlowchart()
     {
-        var document = Document.Create("Test PRD", DocumentType.Prd, Guid.NewGuid(), UserId.New());
+        var ownerId = UserId.New();
+        var document = Document.Create("Test PRD", DocumentType.Prd, Guid.NewGuid(), ownerId);
         document.UpdateContent("# PRD\n## Features\n- User login\n- Dashboard");
 
         var documentRepo = Substitute.For<IDocumentRepository>();
@@ -24,7 +25,7 @@ public class GenerateDiagramHandlerTests
             .Returns(new LlmResponse("flowchart TD\n    A[Start] --> B[Login]\n    B --> C[Dashboard]", 100, 200, true));
 
         var handler = new GenerateDiagramHandler(llmProvider, documentRepo);
-        var command = new GenerateDiagramCommand(Guid.NewGuid(), DiagramType.Flowchart, null);
+        var command = new GenerateDiagramCommand(document.Id, DiagramType.Flowchart, ownerId.Value);
 
         var result = await handler.Handle(command, CancellationToken.None);
 

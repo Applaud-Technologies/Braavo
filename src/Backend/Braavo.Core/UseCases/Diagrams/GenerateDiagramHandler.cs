@@ -21,6 +21,9 @@ public class GenerateDiagramHandler : IRequestHandler<GenerateDiagramCommand, Di
         if (document is null)
             return new DiagramResponse("", request.Type, false, "Document not found");
 
+        if (document.CreatedBy.Value != request.UserId)
+            return new DiagramResponse("", request.Type, false, "Forbidden");
+
         var systemPrompt = GetSystemPrompt(request.Type);
         var userPrompt = BuildUserPrompt(document.Content, request.Type, request.Focus);
 

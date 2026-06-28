@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react';
 import mermaid from 'mermaid';
 
+let idCounter = 0;
+
 mermaid.initialize({
   startOnLoad: false,
   theme: 'neutral',
-  securityLevel: 'loose',
+  securityLevel: 'strict',
 });
 
 interface MermaidDiagramProps {
@@ -19,7 +21,7 @@ export default function MermaidDiagram({ code, className = '' }: MermaidDiagramP
     if (containerRef.current && code) {
       const renderDiagram = async () => {
         try {
-          const id = `mermaid-${Date.now()}`;
+          const id = `mermaid-${++idCounter}`;
           const { svg } = await mermaid.render(id, code);
           if (containerRef.current) {
             containerRef.current.innerHTML = svg;

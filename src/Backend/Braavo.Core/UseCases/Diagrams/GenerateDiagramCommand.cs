@@ -14,7 +14,8 @@ public enum DiagramType
 public record GenerateDiagramCommand(
     Guid DocumentId,
     DiagramType Type,
-    string? Focus
+    Guid UserId,
+    string? Focus = null
 ) : IRequest<DiagramResponse>;
 
 public record DiagramResponse(

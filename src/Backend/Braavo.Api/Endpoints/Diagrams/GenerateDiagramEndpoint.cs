@@ -20,19 +20,31 @@ public class GenerateDiagramEndpoint : Endpoint<DiagramRequest, DiagramResponse>
 
     public override async Task HandleAsync(DiagramRequest req, CancellationToken ct)
     {
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+        {
+            await SendUnauthorizedAsync(ct);
+            return;
+        }
+
         if (!Enum.TryParse<DiagramType>(req.Type, true, out var diagramType))
         {
             await SendAsync(new DiagramResponse("", DiagramType.Flowchart, false, "Invalid diagram type"), 400, ct);
             return;
         }
 
-        var command = new GenerateDiagramCommand(req.DocumentId, diagramType, req.Focus);
+        var command = new GenerateDiagramCommand(req.DocumentId, diagramType, userId, req.Focus);
         var result = await _mediator.Send(command, ct);
 
         if (result.Success)
             await SendOkAsync(result, ct);
         else if (result.Error == "Document not found")
             await SendNotFoundAsync(ct);
+        else if (result.Error == "Forbidden")
+        {
+            await SendForbiddenAsync(ct);
+            return;
+        }
         else
             await SendAsync(result, 500, ct);
     }
