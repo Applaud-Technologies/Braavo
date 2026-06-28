@@ -29,6 +29,7 @@ export default function ChatPage() {
         content: string;
         documentId: string;
         success: boolean;
+        error?: string;
       }>('/chat/message', {
         projectId,
         documentId,
@@ -43,6 +44,13 @@ export default function ChatPage() {
           content: response.data.content,
         };
         setMessages((prev) => [...prev, assistantMessage]);
+      } else {
+        const errorMessage: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `Error: ${response.data.error || 'Failed to generate response'}`,
+        };
+        setMessages((prev) => [...prev, errorMessage]);
       }
     } catch {
       const errorMessage: Message = {
