@@ -27,8 +27,9 @@ export const fetchProduct = createAsyncThunk('products/fetchOne', async (id: str
 
 export const createProduct = createAsyncThunk(
   'products/create',
-  async (data: { name: string; description: string }) => {
+  async (data: { name: string; description: string }, { dispatch }) => {
     const response = await productsApi.create(data);
+    dispatch(fetchProducts());
     return response.data;
   }
 );

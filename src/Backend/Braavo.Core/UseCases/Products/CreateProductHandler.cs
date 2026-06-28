@@ -27,6 +27,11 @@ public class CreateProductHandler : IRequestHandler<CreateProductCommand, Create
             UserId.From(request.UserId)
         );
 
+        if (request.Categories is { Length: > 0 })
+        {
+            product.UpdateCategories(request.Categories);
+        }
+
         await _productRepo.AddAsync(product, ct);
 
         return new CreateProductResponse(product.Id, true);

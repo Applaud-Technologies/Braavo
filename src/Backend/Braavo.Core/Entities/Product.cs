@@ -50,6 +50,12 @@ public class Product
         };
     }
 
+    public void UpdateCategories(string[] categories)
+    {
+        Categories = categories;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
     public void UpdateOverview(string vision, string problemStatement, string valueProposition)
     {
         Vision = vision;

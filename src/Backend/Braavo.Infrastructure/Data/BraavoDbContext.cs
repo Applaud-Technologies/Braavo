@@ -1,5 +1,4 @@
 using Braavo.Core.Entities;
-using Braavo.Infrastructure.Data.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace Braavo.Infrastructure.Data;
@@ -21,11 +20,5 @@ public class BraavoDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(BraavoDbContext).Assembly);
-
-        modelBuilder.ApplyConfiguration(new ProductConfiguration());
-        modelBuilder.ApplyConfiguration(new ProductVersionConfiguration());
-        modelBuilder.ApplyConfiguration(new PersonaConfiguration());
-        modelBuilder.ApplyConfiguration(new UserStoryConfiguration());
-        modelBuilder.ApplyConfiguration(new FeatureConfiguration());
     }
 }
