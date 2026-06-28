@@ -33,14 +33,16 @@ public class RegisterEndpoint : Endpoint<RegisterRequest, AuthResponse>
     {
         if (!Email.TryCreate(req.Email, out var email))
         {
-            await SendAsync(new AuthResponse("", null!), 400, ct);
+            AddError("Invalid email format");
+            await SendErrorsAsync(400, ct);
             return;
         }
 
         var existing = await _users.GetByEmailAsync(email!.Value, ct);
         if (existing is not null)
         {
-            await SendAsync(new AuthResponse("", null!), 409, ct);
+            AddError("Email already registered");
+            await SendErrorsAsync(409, ct);
             return;
         }
 
