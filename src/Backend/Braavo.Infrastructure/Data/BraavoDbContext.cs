@@ -16,6 +16,8 @@ public class BraavoDbContext : DbContext
     public DbSet<Persona> Personas => Set<Persona>();
     public DbSet<UserStory> UserStories => Set<UserStory>();
     public DbSet<Feature> Features => Set<Feature>();
+    public DbSet<TimelinePhase> TimelinePhases => Set<TimelinePhase>();
+    public DbSet<Milestone> Milestones => Set<Milestone>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
