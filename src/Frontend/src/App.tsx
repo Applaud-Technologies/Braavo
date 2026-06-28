@@ -4,6 +4,7 @@ import { store } from './store/store';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ChatPage from './pages/ChatPage';
+import WireframePage from './pages/WireframePage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function Dashboard() {
@@ -47,6 +48,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <ChatPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wireframes"
+            element={
+              <ProtectedRoute>
+                <WireframePage />
               </ProtectedRoute>
             }
           />
