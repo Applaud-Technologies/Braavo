@@ -1,5 +1,5 @@
 import { Provider } from 'react-redux';
-import { BrowserRouter, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom';
 import { store } from './store/store';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -8,6 +8,7 @@ import WireframePage from './pages/WireframePage';
 import { WelcomePage } from './pages/WelcomePage';
 import { ProductListPage } from './pages/ProductListPage';
 import { CreateProductPage } from './pages/CreateProductPage';
+import { ProductDetailPage } from './pages/ProductDetailPage';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function Dashboard() {
@@ -90,7 +91,7 @@ function App() {
             path="/products/:id"
             element={
               <ProtectedRoute>
-                <Navigate to="/products" replace />
+                <ProductDetailPage />
               </ProtectedRoute>
             }
           />
