@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/Braavo.UnitTests/Braavo.UnitTests.csproj" />
+  </Folder>
+  <Project Path="Braavo.Api/Braavo.Api.csproj" />
+  <Project Path="Braavo.Core/Braavo.Core.csproj" />
+  <Project Path="Braavo.Infrastructure/Braavo.Infrastructure.csproj" />
+</Solution>
