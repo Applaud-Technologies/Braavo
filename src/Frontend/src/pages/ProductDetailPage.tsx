@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchProduct, clearCurrentProduct } from '../store/slices/productsSlice';
+import { fetchValidations, clearExport } from '../store/slices/exportSlice';
 import type { RootState } from '../store/store';
 
 export function ProductDetailPage() {
@@ -9,15 +10,20 @@ export function ProductDetailPage() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { currentProduct, loading, error } = useAppSelector((state: RootState) => state.products);
+  const { validations } = useAppSelector((state: RootState) => state.export);
 
   useEffect(() => {
     if (id) {
       dispatch(fetchProduct(id));
+      dispatch(fetchValidations(id));
     }
     return () => {
       dispatch(clearCurrentProduct());
+      dispatch(clearExport());
     };
   }, [dispatch, id]);
+
+  const invalidSections = validations.filter((v) => !v.isValid);
 
   if (loading) {
     return (
@@ -90,10 +96,44 @@ export function ProductDetailPage() {
               <h1 className="text-3xl font-display font-semibold text-stone-800">{currentProduct.name}</h1>
               <p className="text-stone-500 mt-2 leading-relaxed">{currentProduct.description}</p>
             </div>
-            <span className={`px-3 py-1.5 text-sm font-medium rounded-full ${status.bg} ${status.text}`}>
-              {status.label}
-            </span>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <span className={`px-3 py-1.5 text-sm font-medium rounded-full ${status.bg} ${status.text}`}>
+                {status.label}
+              </span>
+              <Link
+                to={`/products/${id}/preview`}
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                Preview PRD
+              </Link>
+            </div>
           </div>
+
+          {invalidSections.length > 0 && (
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+              <div className="flex items-start gap-3">
+                <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-800 mb-1">PRD has incomplete sections</p>
+                  <ul className="space-y-1">
+                    {invalidSections.map((v) =>
+                      v.warnings.map((warning, i) => (
+                        <li key={`${v.section}-${i}`} className="text-sm text-amber-700">
+                          <span className="font-medium">{v.section}:</span> {warning}
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mb-8">
             <div className="flex justify-between items-center text-sm mb-2">
