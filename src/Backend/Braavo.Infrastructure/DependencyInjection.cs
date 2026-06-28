@@ -1,6 +1,7 @@
 using Braavo.Core.Interfaces;
 using Braavo.Infrastructure.Auth;
 using Braavo.Infrastructure.Data;
+using Braavo.Infrastructure.ExternalServices;
 using Braavo.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -24,6 +25,12 @@ public static class DependencyInjection
 
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IJwtService, JwtService>();
+
+        var useMockLlm = configuration.GetValue<bool>("UseMockLlm");
+        if (useMockLlm)
+            services.AddSingleton<ILlmProvider, MockLlmProvider>();
+        else
+            services.AddSingleton<ILlmProvider, OpenAiLlmProvider>();
 
         return services;
     }
