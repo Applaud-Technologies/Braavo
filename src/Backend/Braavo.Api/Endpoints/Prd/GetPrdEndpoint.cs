@@ -1,6 +1,7 @@
 using Braavo.Core.Interfaces;
 using Braavo.Core.Models;
 using Braavo.Core.UseCases.Prd;
+using Braavo.Core.ValueObjects;
 using FastEndpoints;
 
 namespace Braavo.Api.Endpoints.Prd;
@@ -25,6 +26,19 @@ public class GetPrdEndpoint : EndpointWithoutRequest<PrdResponse>
         if (document is null)
         {
             await SendNotFoundAsync(ct);
+            return;
+        }
+
+        var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+        if (userIdClaim is null || !Guid.TryParse(userIdClaim.Value, out var userId))
+        {
+            await SendUnauthorizedAsync(ct);
+            return;
+        }
+
+        if (document.CreatedBy != new UserId(userId))
+        {
+            await SendForbiddenAsync(ct);
             return;
         }
 

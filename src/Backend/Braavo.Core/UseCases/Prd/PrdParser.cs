@@ -29,7 +29,7 @@ public static partial class PrdParser
     private static string ExtractTitle(string markdown)
     {
         var match = TitleRegex().Match(markdown);
-        return match.Success ? match.Groups[1].Value.Trim() : "Untitled PRD";
+        return match.Success ? match.Groups[1].Value.Trim() : "";
     }
 
     private static string ExtractSection(string markdown, string sectionName)
