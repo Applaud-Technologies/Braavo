@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchStories, createStory, updateStory } from '../store/slices/storiesSlice';
 import { fetchPersonas } from '../store/slices/personasSlice';
 import { fetchProduct } from '../store/slices/productsSlice';
 import { suggestStories, removeSuggestedStory, clearSuggestedStories } from '../store/slices/aiSlice';
+import { fetchDependencies } from '../store/slices/dependenciesSlice';
 import type { RootState } from '../store/store';
 import type { UserStory, CreateUserStoryRequest, StoryPriority } from '../api/stories';
 import type { SuggestedStory } from '../api/ai';
@@ -36,6 +37,7 @@ export function StoriesPage() {
   const { items: personas } = useAppSelector((state: RootState) => state.personas);
   const { currentProduct } = useAppSelector((state: RootState) => state.products);
   const { suggestedStories, loading: aiLoading } = useAppSelector((state: RootState) => state.ai);
+  const { status: depStatus } = useAppSelector((state: RootState) => state.dependencies);
 
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingStory, setEditingStory] = useState<UserStory | undefined>(undefined);
@@ -48,10 +50,14 @@ export function StoriesPage() {
       dispatch(fetchProduct(id));
       dispatch(fetchPersonas(id));
       dispatch(fetchStories(id));
+      dispatch(fetchDependencies(id));
     }
   }, [dispatch, id]);
 
+  const canAddStory = depStatus?.canCreateStories ?? false;
+
   const handleOpenCreate = () => {
+    if (!canAddStory) return;
     setEditingStory(undefined);
     setEditorOpen(true);
   };
@@ -143,13 +149,37 @@ export function StoriesPage() {
               <p className="text-stone-500 mt-1 text-sm">{currentProduct.name}</p>
             )}
           </div>
-          <button onClick={handleOpenCreate} className="btn-primary flex items-center gap-2">
+          <button
+            onClick={handleOpenCreate}
+            disabled={!canAddStory}
+            className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
             Add Story
           </button>
         </div>
+
+        {/* Dependency warning */}
+        {depStatus && !depStatus.canCreateStories && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p className="font-medium text-amber-800">Features Required</p>
+                <p className="text-sm text-amber-700 mt-1">
+                  Create at least one feature before adding user stories.{' '}
+                  <Link to={`/products/${id}/features`} className="underline hover:text-amber-900">
+                    Go to Features
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* AI Story Suggestions */}
         <div className="card p-6 mb-8">
