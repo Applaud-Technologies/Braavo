@@ -14,7 +14,7 @@ public class GetDependencyStatusEndpoint : EndpointWithoutRequest<DependencyStat
     public override void Configure()
     {
         Get("/products/{id}/dependencies");
-        Roles("User");
+        Claims(ClaimTypes.NameIdentifier);
     }
 
     public override async Task HandleAsync(CancellationToken ct)
