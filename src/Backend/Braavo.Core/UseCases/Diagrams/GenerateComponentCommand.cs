@@ -41,7 +41,7 @@ public class GenerateComponentHandler : IRequestHandler<GenerateComponentCommand
         if (features.Count == 0)
             return new GenerateComponentResult(false, Error: "No features found", IsUnprocessableEntity: true);
 
-        var prdContent = BuildPrdContent(product, features);
+        var prdContent = BuildPrdContent(features);
 
         var systemPrompt = """
             Generate a Mermaid.js flowchart diagram representing a UML-style component architecture.
@@ -76,7 +76,7 @@ public class GenerateComponentHandler : IRequestHandler<GenerateComponentCommand
         return new GenerateComponentResult(true, MermaidCode: mermaidCode);
     }
 
-    private static string BuildPrdContent(Entities.Product product, IReadOnlyList<Entities.Feature> features)
+    private static string BuildPrdContent(IReadOnlyList<Entities.Feature> features)
     {
         var sb = new StringBuilder();
         foreach (var feature in features.OrderBy(f => f.Phase).ThenBy(f => f.SortOrder))
