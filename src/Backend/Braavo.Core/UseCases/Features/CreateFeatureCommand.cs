@@ -27,12 +27,18 @@ public class CreateFeatureHandler : IRequestHandler<CreateFeatureCommand, Create
 {
     private readonly IProductRepository _productRepo;
     private readonly IFeatureRepository _featureRepo;
+    private readonly IPersonaRepository _personaRepo;
     private readonly IMediator _mediator;
 
-    public CreateFeatureHandler(IProductRepository productRepo, IFeatureRepository featureRepo, IMediator mediator)
+    public CreateFeatureHandler(
+        IProductRepository productRepo,
+        IFeatureRepository featureRepo,
+        IPersonaRepository personaRepo,
+        IMediator mediator)
     {
         _productRepo = productRepo;
         _featureRepo = featureRepo;
+        _personaRepo = personaRepo;
         _mediator    = mediator;
     }
 
@@ -41,6 +47,10 @@ public class CreateFeatureHandler : IRequestHandler<CreateFeatureCommand, Create
         var product = await _productRepo.GetByIdAsync(request.ProductId, ct);
         if (product is null || product.OwnerId != UserId.From(request.UserId))
             return new CreateFeatureResult(Guid.Empty, false, "Product not found");
+
+        var personas = await _personaRepo.GetByProductIdAsync(request.ProductId, ct);
+        if (personas.Count == 0)
+            return new CreateFeatureResult(Guid.Empty, false, "At least one persona is required before creating features");
 
         if (string.IsNullOrWhiteSpace(request.Name))
             return new CreateFeatureResult(Guid.Empty, false, "Feature name is required");
