@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../store/hooks';
 import {
   generateUserJourney,
   generateFeatureHierarchy,
+  generateComponentDiagram,
   clearDiagrams,
 } from '../store/slices/diagramsSlice';
 import { fetchPersonas } from '../store/slices/personasSlice';
@@ -83,6 +84,9 @@ export function DiagramsPage() {
     featureHierarchyCode,
     featureHierarchyLoading,
     featureHierarchyError,
+    componentCode,
+    componentLoading,
+    componentError,
   } = useAppSelector((state: RootState) => state.diagrams);
 
   const { items: personas } = useAppSelector((state: RootState) => state.personas);
@@ -117,6 +121,11 @@ export function DiagramsPage() {
   const handleGenerateFeatureHierarchy = () => {
     if (!id) return;
     dispatch(generateFeatureHierarchy(id));
+  };
+
+  const handleGenerateComponent = () => {
+    if (!id) return;
+    dispatch(generateComponentDiagram(id));
   };
 
   // ── render ──────────────────────────────────────────────────────────────────
@@ -261,6 +270,49 @@ export function DiagramsPage() {
               diagramId="feature-hierarchy-diagram"
               filename="feature-hierarchy"
               placeholder='Click "Generate Hierarchy" to create a feature hierarchy diagram.'
+            />
+          </div>
+
+          {/* Component Architecture card */}
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="font-display font-semibold text-lg text-stone-800">Component Architecture</h3>
+                <p className="text-stone-500 text-sm mt-0.5">
+                  Visualise the system's components, services, and their dependencies.
+                </p>
+              </div>
+              <button
+                onClick={handleGenerateComponent}
+                disabled={componentLoading || !id}
+                className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {componentLoading ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                    Generate Architecture
+                  </>
+                )}
+              </button>
+            </div>
+
+            <DiagramSection
+              code={componentCode}
+              loading={componentLoading}
+              error={componentError}
+              diagramId="component-diagram"
+              filename="component-architecture"
+              placeholder='Click "Generate Architecture" to create a component architecture diagram.'
             />
           </div>
 

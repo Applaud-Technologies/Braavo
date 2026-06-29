@@ -13,4 +13,7 @@ export const diagramsApi = {
 
   generateFeatureHierarchy: (productId: string) =>
     api.post<DiagramResult>(`/products/${productId}/diagrams/feature-hierarchy`),
+
+  generateComponent: (productId: string) =>
+    api.post<DiagramResult>(`/products/${productId}/diagrams/component`),
 };

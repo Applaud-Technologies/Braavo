@@ -10,6 +10,10 @@ interface DiagramsState {
   featureHierarchyCode: string | null;
   featureHierarchyLoading: boolean;
   featureHierarchyError: string | null;
+  // Component Architecture
+  componentCode: string | null;
+  componentLoading: boolean;
+  componentError: string | null;
 }
 
 const initialState: DiagramsState = {
@@ -19,6 +23,9 @@ const initialState: DiagramsState = {
   featureHierarchyCode: null,
   featureHierarchyLoading: false,
   featureHierarchyError: null,
+  componentCode: null,
+  componentLoading: false,
+  componentError: null,
 };
 
 export const generateUserJourney = createAsyncThunk(
@@ -41,6 +48,16 @@ export const generateFeatureHierarchy = createAsyncThunk(
   }
 );
 
+export const generateComponentDiagram = createAsyncThunk(
+  'diagrams/generateComponent',
+  async (productId: string) => {
+    const response = await diagramsApi.generateComponent(productId);
+    const data = response.data as { mermaidCode?: string } | string;
+    if (typeof data === 'string') return data;
+    return (data as { mermaidCode?: string }).mermaidCode ?? '';
+  }
+);
+
 const diagramsSlice = createSlice({
   name: 'diagrams',
   initialState,
@@ -50,6 +67,8 @@ const diagramsSlice = createSlice({
       state.userJourneyError = null;
       state.featureHierarchyCode = null;
       state.featureHierarchyError = null;
+      state.componentCode = null;
+      state.componentError = null;
     },
     clearUserJourney: (state) => {
       state.userJourneyCode = null;
@@ -58,6 +77,10 @@ const diagramsSlice = createSlice({
     clearFeatureHierarchy: (state) => {
       state.featureHierarchyCode = null;
       state.featureHierarchyError = null;
+    },
+    clearComponent: (state) => {
+      state.componentCode = null;
+      state.componentError = null;
     },
   },
   extraReducers: (builder) => {
@@ -89,9 +112,23 @@ const diagramsSlice = createSlice({
       .addCase(generateFeatureHierarchy.rejected, (state, action) => {
         state.featureHierarchyLoading = false;
         state.featureHierarchyError = action.error.message ?? 'Failed to generate feature hierarchy diagram';
+      })
+      // generateComponentDiagram
+      .addCase(generateComponentDiagram.pending, (state) => {
+        state.componentLoading = true;
+        state.componentError = null;
+        state.componentCode = null;
+      })
+      .addCase(generateComponentDiagram.fulfilled, (state, action: PayloadAction<string>) => {
+        state.componentLoading = false;
+        state.componentCode = action.payload;
+      })
+      .addCase(generateComponentDiagram.rejected, (state, action) => {
+        state.componentLoading = false;
+        state.componentError = action.error.message ?? 'Failed to generate component architecture diagram';
       });
   },
 });
 
-export const { clearDiagrams, clearUserJourney, clearFeatureHierarchy } = diagramsSlice.actions;
+export const { clearDiagrams, clearUserJourney, clearFeatureHierarchy, clearComponent } = diagramsSlice.actions;
 export default diagramsSlice.reducer;
