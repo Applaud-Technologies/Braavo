@@ -65,6 +65,15 @@ public class GenerateDiagramHandler : IRequestHandler<GenerateDiagramCommand, Di
             Map out the main user experience flow.
             Return ONLY the Mermaid code, no explanation.
             """,
+        DiagramType.Component => """
+            Generate a Mermaid.js flowchart diagram representing a UML-style component architecture.
+            Use 'flowchart TB' for top-to-bottom layout.
+            Identify system components (frontend, backend, services, databases, external APIs).
+            Show dependencies between components with labeled arrows.
+            Group related components in subgraphs.
+            Use descriptive node names like 'WebApp[Web Application]', 'API[REST API]', 'DB[(Database)]'.
+            Return ONLY the Mermaid code, no explanation.
+            """,
         _ => "Generate a Mermaid.js diagram. Return ONLY the Mermaid code."
     };
 

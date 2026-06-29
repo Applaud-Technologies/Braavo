@@ -8,7 +8,8 @@ public enum DiagramType
     Sequence,
     ClassDiagram,
     EntityRelationship,
-    UserJourney
+    UserJourney,
+    Component
 }
 
 public record GenerateDiagramCommand(
