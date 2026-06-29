@@ -8,6 +8,7 @@ import aiReducer from './slices/aiSlice';
 import timelineReducer from './slices/timelineSlice';
 import diagramsReducer from './slices/diagramsSlice';
 import exportReducer from './slices/exportSlice';
+import dependenciesReducer from './slices/dependenciesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,7 @@ export const store = configureStore({
     timeline: timelineReducer,
     diagrams: diagramsReducer,
     export: exportReducer,
+    dependencies: dependenciesReducer,
   },
 });
 
