@@ -25,12 +25,18 @@ public class CreateUserStoryHandler : IRequestHandler<CreateUserStoryCommand, Cr
 {
     private readonly IProductRepository _productRepo;
     private readonly IUserStoryRepository _storyRepo;
+    private readonly IFeatureRepository _featureRepo;
     private readonly IMediator _mediator;
 
-    public CreateUserStoryHandler(IProductRepository productRepo, IUserStoryRepository storyRepo, IMediator mediator)
+    public CreateUserStoryHandler(
+        IProductRepository productRepo,
+        IUserStoryRepository storyRepo,
+        IFeatureRepository featureRepo,
+        IMediator mediator)
     {
         _productRepo = productRepo;
         _storyRepo   = storyRepo;
+        _featureRepo = featureRepo;
         _mediator    = mediator;
     }
 
@@ -39,6 +45,10 @@ public class CreateUserStoryHandler : IRequestHandler<CreateUserStoryCommand, Cr
         var product = await _productRepo.GetByIdAsync(request.ProductId, ct);
         if (product is null || product.OwnerId != UserId.From(request.UserId))
             return new CreateUserStoryResult(Guid.Empty, false, "Product not found");
+
+        var features = await _featureRepo.GetByProductIdAsync(request.ProductId, ct);
+        if (features.Count == 0)
+            return new CreateUserStoryResult(Guid.Empty, false, "At least one feature is required before creating user stories");
 
         if (string.IsNullOrWhiteSpace(request.AsA))
             return new CreateUserStoryResult(Guid.Empty, false, "AsA is required");
