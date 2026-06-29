@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchFeatures, createFeature, updateFeature, deleteFeature, moveFeature } from '../store/slices/featuresSlice';
 import { fetchProduct } from '../store/slices/productsSlice';
+import { fetchDependencies } from '../store/slices/dependenciesSlice';
 import { suggestFeatures, removeSuggestedFeature } from '../store/slices/aiSlice';
 import type { RootState } from '../store/store';
 import type { Feature, CreateFeatureRequest, FeaturePhase } from '../api/features';
@@ -20,6 +21,7 @@ export function FeaturesPage() {
   const { items: features, loading, error } = useAppSelector((state: RootState) => state.features);
   const { currentProduct } = useAppSelector((state: RootState) => state.products);
   const { suggestedFeatures, loading: aiLoading } = useAppSelector((state: RootState) => state.ai);
+  const { status: depStatus } = useAppSelector((state: RootState) => state.dependencies);
 
   const phaseColors: Record<string, string> = {
     Mvp: 'bg-emerald-100 text-emerald-800',
@@ -35,10 +37,14 @@ export function FeaturesPage() {
     if (id) {
       dispatch(fetchProduct(id));
       dispatch(fetchFeatures(id));
+      dispatch(fetchDependencies(id));
     }
   }, [dispatch, id]);
 
+  const canAddFeature = depStatus?.canCreateFeatures ?? false;
+
   const handleOpenCreate = (phase: FeaturePhase = 'Mvp') => {
+    if (!canAddFeature) return;
     setEditingFeature(undefined);
     setDefaultPhase(phase);
     setEditorOpen(true);
@@ -135,7 +141,8 @@ export function FeaturesPage() {
           </div>
           <button
             onClick={() => handleOpenCreate()}
-            className="btn-primary flex items-center gap-2 shrink-0"
+            disabled={!canAddFeature}
+            className="btn-primary flex items-center gap-2 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -178,6 +185,26 @@ export function FeaturesPage() {
             </div>
           )}
         </div>
+
+        {/* Dependency warning */}
+        {depStatus && !depStatus.canCreateFeatures && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <div className="flex items-start gap-3">
+              <svg className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p className="font-medium text-amber-800">Personas Required</p>
+                <p className="text-sm text-amber-700 mt-1">
+                  Create at least one persona before adding features.{' '}
+                  <Link to={`/products/${id}/personas`} className="underline hover:text-amber-900">
+                    Go to Personas
+                  </Link>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Error state */}
         {error && (
